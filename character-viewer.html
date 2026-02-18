@@ -216,6 +216,141 @@ body{
     to{ background-position:600px 600px; }
 }
 
+
+/* ================= TOOL PANEL ================= */
+
+.bgPanel{
+    max-width:780px;
+    margin:0 auto 26px auto;
+
+    padding:24px 26px;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.06),
+            rgba(255,255,255,.02)
+        );
+
+    backdrop-filter: blur(18px) saturate(140%);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.35),
+        inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* Panel Titles */
+.bgPanel h3{
+    margin:0 0 16px 0;
+    font-size:14px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    opacity:.65;
+}
+
+
+/* ================= ROW LAYOUT ================= */
+
+.bgRow{
+    display:grid;
+    grid-template-columns: 80px 48px 1fr;
+    gap:12px;
+    align-items:center;
+    margin-bottom:14px;
+}
+
+.bgRow label{
+    font-size:14px;
+    opacity:.8;
+}
+
+
+/* ================= INPUT STYLING ================= */
+
+.bgPanel input[type="text"]{
+    height:40px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.08);
+
+    background:rgba(0,0,0,.25);
+    color:white;
+
+    padding:0 12px;
+
+    outline:none;
+
+    transition:.2s;
+}
+
+.bgPanel input[type="text"]:focus{
+    border-color:rgba(120,180,255,.6);
+    box-shadow:0 0 0 2px rgba(120,180,255,.15);
+}
+
+
+/* COLOR PICKER WRAP */
+.bgPanel input[type="color"]{
+    width:48px;
+    height:40px;
+    padding:2px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.12);
+    background:rgba(0,0,0,.3);
+    cursor:pointer;
+}
+
+
+/* ================= RANGE SLIDER ================= */
+
+.bgPanel input[type="range"]{
+    appearance:none;
+    height:6px;
+    border-radius:999px;
+    background:rgba(255,255,255,.15);
+}
+
+.bgPanel input[type="range"]::-webkit-slider-thumb{
+    appearance:none;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#5aa2ff,#7ab6ff);
+
+    box-shadow:
+        0 4px 10px rgba(0,0,0,.4);
+}
+
+#angleLabel{
+    font-size:13px;
+    opacity:.7;
+}
+
+
+/* ================= EFFECT CHECKBOXES ================= */
+
+.bgPanel label:has(input[type="checkbox"]){
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:8px;
+    font-size:14px;
+    opacity:.85;
+}
+
+.bgPanel input[type="checkbox"]{
+    width:18px;
+    height:18px;
+    accent-color:#5aa2ff;
+    cursor:pointer;
+}
+
+
+
 </style>
 </head>
 
