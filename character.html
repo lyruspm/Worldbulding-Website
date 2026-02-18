@@ -89,6 +89,7 @@ header{
     margin-top:6px;
 }
 
+
 /* BOTTOM NAV */
 .bottom-nav{
     position:fixed;
@@ -142,6 +143,18 @@ header{
 .fab:active{
     transform:rotate(90deg) scale(0.95);
 }
+
+/* AVATAR CSS */
+.avatar{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    background:var(--bg-accent);
+    margin-bottom:10px;
+    display:block;
+}
+
 
 
 
@@ -215,10 +228,17 @@ characters.forEach((char, index) => {
     card.className = "card";
 
     card.innerHTML = `
-        <div class="card-title">${char.name}</div>
-        <div>${char.desc || ""}</div>
-        <div class="card-tags">${char.tags || ""}</div>
-    `;
+
+    ${char.image 
+        ? `<img src="${char.image}" class="avatar">`
+        : `<div class="avatar"></div>`
+    }
+
+    <div class="card-title">${char.name}</div>
+    <div>${char.desc || ""}</div>
+    <div class="card-tags">${char.tags || ""}</div>
+`;
+
 
     // CLICK CARD
     card.addEventListener("click", () => {
