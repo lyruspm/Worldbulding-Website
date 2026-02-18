@@ -27,6 +27,10 @@ body{
 
 .viewer{
     --viewer-bg:#1a1d26;
+    
+   display:flex;
+   flex-direction:column;
+   gap:18px;
 
     background:#1a1d26;
     backdrop-filter: blur(22px) saturate(140%);
@@ -405,6 +409,11 @@ Download Character PNG
 <!-- JAVASCRIPT -->
 
 <script>
+
+/* =========================
+   LOAD CHARACTER
+========================= */
+
 const chars = JSON.parse(localStorage.getItem("characters")) || [];
 const index = localStorage.getItem("viewingCharacterIndex");
 const char = chars[index];
@@ -414,96 +423,20 @@ if(!char){
     location.href = "character.html";
 }
 
+/* =========================
+   ELEMENTS
+========================= */
 
-const vImage = document.getElementById("vImage");
-const vName = document.getElementById("vName");
-const vDesc = document.getElementById("vDesc");
-const vTags = document.getElementById("vTags");
-const vLore = document.getElementById("vLore");
-const vLife = document.getElementById("vLife");
-const vRelationships = document.getElementById("vRelationships");
 const viewer = document.getElementById("viewerCard");
 const downloadBtn = document.getElementById("downloadBtn");
 
+const vImage = document.getElementById("vImage");
+const vName = document.getElementById("vName");
+const vTags = document.getElementById("vTags");
 
-vImage.src = char.image || "";
-vName.textContent = char.name || "Unnamed";
-vDesc.textContent = char.desc || "-";
-vTags.textContent = char.tags || "-";
-
-function statRow(label, value){
-    return `
-        <div class="stat-row">
-            <span class="stat-label">${label}</span>
-            <span class="stat-value">${value || "-"}</span>
-        </div>
-    `;
-}
-
-vLore.innerHTML =
-    statRow("Species", char.species) +
-    statRow("Faction", char.faction) +
-    statRow("Origin", char.origin) +
-    statRow("Alignment", char.alignment);
-
-vLife.innerHTML =
-    statRow("Birth", char.birthDate) +
-    statRow("Death", char.deathDate || "Alive") +
-    statRow("Status", char.status) +
-    statRow("Age", char.age);
-
-
-vRelationships.innerHTML = (char.relationships || [])
-.map(r => `<span class="relationship-chip">${r.name} — ${r.type}</span>`)
-.join("") || "None";
-
-
-/* DOWNLOAD PNG */
-
-downloadBtn.onclick = async () => {
-
-    const canvas = await html2canvas(viewer, {
-        backgroundColor: null,
-        useCORS: true,
-        scale: 2
-    });
-
-    const link = document.createElement("a");
-    link.download = (char.name || "character") + ".png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-};
-
-
-/* ================ COLOR DETECTORS =================*/
-
+/* BG Controls */
 const picker = document.getElementById("bgColorPicker");
 const hexInput = document.getElementById("bgHexInput");
-
-/* HEX → RGB */
-function hexToRgb(hex){
-
-    hex = hex.replace("#","");
-
-    if(hex.length === 3){
-        hex = hex.split("").map(c => c+c).join("");
-    }
-
-    const num = parseInt(hex, 16);
-
-    return {
-        r:(num >> 16) & 255,
-        g:(num >> 8) & 255,
-        b:num & 255
-    };
-}
-
-/* BRIGHTNESS DETECTOR */
-function getBrightness({r,g,b}){
-    return (r*299 + g*587 + b*114) / 1000;
-}
-
-/* ======================= GRADIENT ENGINE ====================== */
 
 const gradA = document.getElementById("gradA");
 const gradB = document.getElementById("gradB");
@@ -512,14 +445,48 @@ const gradBHex = document.getElementById("gradBHex");
 const gradAngle = document.getElementById("gradAngle");
 const angleLabel = document.getElementById("angleLabel");
 
-/* ================= BACKGROUND ENGINE ================= */
+/* =========================
+   BASIC CHARACTER LOAD
+========================= */
+
+vImage.src = char.image || "";
+vName.textContent = char.name || "Unnamed";
+vTags.textContent = char.tags || "";
+
+/* =========================
+   UTILITY FUNCTIONS
+========================= */
+
+function hexToRgb(hex){
+    hex = hex.replace("#","");
+    if(hex.length === 3){
+        hex = hex.split("").map(c=>c+c).join("");
+    }
+    const num = parseInt(hex,16);
+    return {
+        r:(num>>16)&255,
+        g:(num>>8)&255,
+        b:num&255
+    };
+}
+
+function getBrightness({r,g,b}){
+    return (r*299 + g*587 + b*114)/1000;
+}
+
+function setAutoText(hex){
+    const rgb = hexToRgb(hex);
+    viewer.style.color =
+        getBrightness(rgb) > 150 ? "#111" : "#fff";
+}
+
+/* =========================
+   BACKGROUND ENGINE
+========================= */
 
 function applySolid(hex){
     viewer.style.background = hex;
-
-    const rgb = hexToRgb(hex);
-    const brightness = getBrightness(rgb);
-    viewer.style.color = brightness > 150 ? "#111" : "#fff";
+    setAutoText(hex);
 }
 
 function applyGradient(){
@@ -530,18 +497,35 @@ function applyGradient(){
     viewer.style.background =
         `linear-gradient(${angle}deg, ${a}, ${b})`;
 
-    autoTextFromGradient(a, b);
+    autoTextFromGradient(a,b);
 }
 
-/* PICKER SOLID MODE */
-picker.addEventListener("input", ()=>{
+function autoTextFromGradient(a,b){
+    const rgbA = hexToRgb(a);
+    const rgbB = hexToRgb(b);
+
+    const avg = {
+        r:(rgbA.r+rgbB.r)/2,
+        g:(rgbA.g+rgbB.g)/2,
+        b:(rgbA.b+rgbB.b)/2
+    };
+
+    viewer.style.color =
+        getBrightness(avg) > 150 ? "#111" : "#fff";
+}
+
+/* =========================
+   BACKGROUND LISTENERS
+========================= */
+
+picker.addEventListener("input",()=>{
     hexInput.value = picker.value;
     applySolid(picker.value);
 });
 
-hexInput.addEventListener("input", ()=>{
+hexInput.addEventListener("input",()=>{
     let val = hexInput.value.trim();
-    if(!val.startsWith("#")) val = "#"+val;
+    if(!val.startsWith("#")) val="#"+val;
 
     if(/^#[0-9A-F]{6}$/i.test(val)){
         picker.value = val;
@@ -549,7 +533,8 @@ hexInput.addEventListener("input", ()=>{
     }
 });
 
-/* GRADIENT CONTROLS */
+/* Gradient */
+
 gradA.oninput = ()=>{
     gradAHex.value = gradA.value;
     applyGradient();
@@ -565,11 +550,9 @@ gradAngle.oninput = ()=>{
     applyGradient();
 };
 
-/* HEX INPUT SAFE */
 gradAHex.oninput = ()=>{
     let val = gradAHex.value.trim();
-    if(val.length < 7) return;
-    if(!val.startsWith("#")) val = "#"+val;
+    if(!val.startsWith("#")) val="#"+val;
 
     if(/^#[0-9A-F]{6}$/i.test(val)){
         gradA.value = val;
@@ -579,8 +562,7 @@ gradAHex.oninput = ()=>{
 
 gradBHex.oninput = ()=>{
     let val = gradBHex.value.trim();
-    if(val.length < 7) return;
-    if(!val.startsWith("#")) val = "#"+val;
+    if(!val.startsWith("#")) val="#"+val;
 
     if(/^#[0-9A-F]{6}$/i.test(val)){
         gradB.value = val;
@@ -588,38 +570,129 @@ gradBHex.oninput = ()=>{
     }
 };
 
-/* TEXT DETECTION */
+/* =========================
+   TEMPLATE BUILDERS
+========================= */
 
-function autoTextFromGradient(hexA, hexB){
-
-    const rgbA = hexToRgb(hexA);
-    const rgbB = hexToRgb(hexB);
-
-    const avg = {
-        r:(rgbA.r + rgbB.r)/2,
-        g:(rgbA.g + rgbB.g)/2,
-        b:(rgbA.b + rgbB.b)/2
-    };
-
-    const brightness = getBrightness(avg);
-
-    viewer.style.color = brightness > 150 ? "#111" : "#fff";
+function statRow(label,value){
+    return `
+        <div class="stat-row">
+            <span class="stat-label">${label}</span>
+            <span class="stat-value">${value || "-"}</span>
+        </div>
+    `;
 }
 
-gradAHex.addEventListener("input", ()=>{
-    let val = gradAHex.value.trim();
+function chip(text){
+    return `<span class="relationship-chip">${text}</span>`;
+}
 
-    if(!val.startsWith("#")) val = "#"+val;
+function buildSection(title, content){
+    if(!content) return "";
 
-    if(/^#[0-9A-F]{6}$/i.test(val)){
-        gradA.value = val;
-        applyGradient();
-        
-   if(val.length < 7) return;   
-    }
-});
+    return `
+        <div class="section">
+            <div class="section-title">${title}</div>
+            <div class="section-content">
+                ${content || "<em>None</em>"}
+            </div>
+        </div>
+    `;
+}
+
+/* =========================
+   SECTION REGISTRY (FUTUREPROOF)
+========================= */
+
+const SECTION_TEMPLATE = [
+
+{
+    title:"Description",
+    build:c=> `<p>${c.desc || "-"}</p>`
+},
+
+{
+    title:"Lore",
+    build:c=>
+        statRow("Species",c.species) +
+        statRow("Faction",c.faction) +
+        statRow("Origin",c.origin) +
+        statRow("Alignment",c.alignment)
+},
+
+{
+    title:"Life Data",
+    build:c=>
+        statRow("Birth",c.birthDate) +
+        statRow("Death",c.deathDate || "Alive") +
+        statRow("Status",c.status) +
+        statRow("Age",c.age)
+},
+
+{
+    title:"Relationships",
+    build:c=>
+        (c.relationships || [])
+        .map(r=> chip(`${r.name} — ${r.type}`))
+        .join("")
+}
+
+];
+
+/* =========================
+   RENDER SECTIONS
+========================= */
+
+function renderSections(character){
+
+    let html="";
+
+    SECTION_TEMPLATE.forEach(section=>{
+        const content = section.build(character);
+        if(!content) return;
+        html += buildSection(section.title,content);
+    });
+
+    viewer.insertAdjacentHTML("beforeend", html);
+}
+
+renderSections(char);
+
+/* =========================
+   EXPORT ENGINE
+========================= */
+
+downloadBtn.onclick = async ()=>{
+
+    const exportWrapper = document.createElement("div");
+
+    exportWrapper.style.padding = "40px";
+    exportWrapper.style.background = "#0f1117";
+    exportWrapper.style.display = "inline-block";
+
+    const clone = viewer.cloneNode(true);
+
+    /* Force solid background */
+    clone.style.background =
+        getComputedStyle(viewer).backgroundColor;
+
+    exportWrapper.appendChild(clone);
+    document.body.appendChild(exportWrapper);
+
+    const canvas = await html2canvas(exportWrapper,{
+        scale:2,
+        backgroundColor:"#0f1117",
+        useCORS:true
+    });
+
+    exportWrapper.remove();
+
+    const link = document.createElement("a");
+    link.download = (char.name || "character") + ".png";
+    link.href = canvas.toDataURL();
+    link.click();
+};
 
 </script>
-
 </body>
 </html>
