@@ -410,9 +410,7 @@ Download Character PNG
 
 <script>
 
-/* =========================
-   LOAD CHARACTER
-========================= */
+/* LOAD CHARACTER */
 
 const chars = JSON.parse(localStorage.getItem("characters")) || [];
 const index = localStorage.getItem("viewingCharacterIndex");
@@ -423,9 +421,7 @@ if(!char){
     location.href = "character.html";
 }
 
-/* =========================
-   ELEMENTS
-========================= */
+/* ELEMENTS */
 
 const viewer = document.getElementById("viewerCard");
 const downloadBtn = document.getElementById("downloadBtn");
@@ -433,8 +429,13 @@ const downloadBtn = document.getElementById("downloadBtn");
 const vImage = document.getElementById("vImage");
 const vName = document.getElementById("vName");
 const vTags = document.getElementById("vTags");
+const vDesc = document.getElementById("vDesc");
+const vLore = document.getElementById("vLore");
+const vLife = document.getElementById("vLife");
+const vRelationships = document.getElementById("vRelationships");
 
 /* BG Controls */
+
 const picker = document.getElementById("bgColorPicker");
 const hexInput = document.getElementById("bgHexInput");
 
@@ -445,23 +446,50 @@ const gradBHex = document.getElementById("gradBHex");
 const gradAngle = document.getElementById("gradAngle");
 const angleLabel = document.getElementById("angleLabel");
 
-/* =========================
-   BASIC CHARACTER LOAD
-========================= */
+/* CHARACTER LOAD */
 
 vImage.src = char.image || "";
 vName.textContent = char.name || "Unnamed";
-vTags.textContent = char.tags || "";
+vTags.textContent = char.tags || "-";
+vDesc.textContent = char.desc || "-";
 
-/* =========================
-   UTILITY FUNCTIONS
-========================= */
+/* HELPERS */
+
+function statRow(label,value){
+    return `
+    <div class="stat-row">
+        <span class="stat-label">${label}</span>
+        <span class="stat-value">${value || "-"}</span>
+    </div>`;
+}
+
+function chip(text){
+    return `<span class="relationship-chip">${text}</span>`;
+}
+
+/* DATA RENDER */
+
+vLore.innerHTML =
+    statRow("Species", char.species) +
+    statRow("Faction", char.faction) +
+    statRow("Origin", char.origin) +
+    statRow("Alignment", char.alignment);
+
+vLife.innerHTML =
+    statRow("Birth", char.birthDate) +
+    statRow("Death", char.deathDate || "Alive") +
+    statRow("Status", char.status) +
+    statRow("Age", char.age);
+
+vRelationships.innerHTML =
+    (char.relationships || [])
+    .map(r => chip(`${r.name} — ${r.type}`))
+    .join("") || "None";
+
+/* COLOR UTILS */
 
 function hexToRgb(hex){
     hex = hex.replace("#","");
-    if(hex.length === 3){
-        hex = hex.split("").map(c=>c+c).join("");
-    }
     const num = parseInt(hex,16);
     return {
         r:(num>>16)&255,
@@ -474,19 +502,17 @@ function getBrightness({r,g,b}){
     return (r*299 + g*587 + b*114)/1000;
 }
 
-function setAutoText(hex){
+function autoText(hex){
     const rgb = hexToRgb(hex);
     viewer.style.color =
         getBrightness(rgb) > 150 ? "#111" : "#fff";
 }
 
-/* =========================
-   BACKGROUND ENGINE
-========================= */
+/* BACKGROUND ENGINE */
 
 function applySolid(hex){
     viewer.style.background = hex;
-    setAutoText(hex);
+    autoText(hex);
 }
 
 function applyGradient(){
@@ -497,10 +523,6 @@ function applyGradient(){
     viewer.style.background =
         `linear-gradient(${angle}deg, ${a}, ${b})`;
 
-    autoTextFromGradient(a,b);
-}
-
-function autoTextFromGradient(a,b){
     const rgbA = hexToRgb(a);
     const rgbB = hexToRgb(b);
 
@@ -514,16 +536,14 @@ function autoTextFromGradient(a,b){
         getBrightness(avg) > 150 ? "#111" : "#fff";
 }
 
-/* =========================
-   BACKGROUND LISTENERS
-========================= */
+/* BACKGROUND LISTENERS */
 
-picker.addEventListener("input",()=>{
+picker.oninput = ()=>{
     hexInput.value = picker.value;
     applySolid(picker.value);
-});
+};
 
-hexInput.addEventListener("input",()=>{
+hexInput.oninput = ()=>{
     let val = hexInput.value.trim();
     if(!val.startsWith("#")) val="#"+val;
 
@@ -531,9 +551,7 @@ hexInput.addEventListener("input",()=>{
         picker.value = val;
         applySolid(val);
     }
-});
-
-/* Gradient */
+};
 
 gradA.oninput = ()=>{
     gradAHex.value = gradA.value;
@@ -570,122 +588,15 @@ gradBHex.oninput = ()=>{
     }
 };
 
-/* =========================
-   TEMPLATE BUILDERS
-========================= */
-
-function statRow(label,value){
-    return `
-        <div class="stat-row">
-            <span class="stat-label">${label}</span>
-            <span class="stat-value">${value || "-"}</span>
-        </div>
-    `;
-}
-
-function chip(text){
-    return `<span class="relationship-chip">${text}</span>`;
-}
-
-function buildSection(title, content){
-    if(!content) return "";
-
-    return `
-        <div class="section">
-            <div class="section-title">${title}</div>
-            <div class="section-content">
-                ${content || "<em>None</em>"}
-            </div>
-        </div>
-    `;
-}
-
-/* =========================
-   SECTION REGISTRY (FUTUREPROOF)
-========================= */
-
-const SECTION_TEMPLATE = [
-
-{
-    title:"Description",
-    build:c=> `<p>${c.desc || "-"}</p>`
-},
-
-{
-    title:"Lore",
-    build:c=>
-        statRow("Species",c.species) +
-        statRow("Faction",c.faction) +
-        statRow("Origin",c.origin) +
-        statRow("Alignment",c.alignment)
-},
-
-{
-    title:"Life Data",
-    build:c=>
-        statRow("Birth",c.birthDate) +
-        statRow("Death",c.deathDate || "Alive") +
-        statRow("Status",c.status) +
-        statRow("Age",c.age)
-},
-
-{
-    title:"Relationships",
-    build:c=>
-        (c.relationships || [])
-        .map(r=> chip(`${r.name} — ${r.type}`))
-        .join("")
-}
-
-];
-
-/* =========================
-   RENDER SECTIONS
-========================= */
-
-function renderSections(character){
-
-    let html="";
-
-    SECTION_TEMPLATE.forEach(section=>{
-        const content = section.build(character);
-        if(!content) return;
-        html += buildSection(section.title,content);
-    });
-
-    viewer.insertAdjacentHTML("beforeend", html);
-}
-
-renderSections(char);
-
-/* =========================
-   EXPORT ENGINE
-========================= */
+/* EXPORT */
 
 downloadBtn.onclick = async ()=>{
 
-    const exportWrapper = document.createElement("div");
-
-    exportWrapper.style.padding = "40px";
-    exportWrapper.style.background = "#0f1117";
-    exportWrapper.style.display = "inline-block";
-
-    const clone = viewer.cloneNode(true);
-
-    /* Force solid background */
-    clone.style.background =
-        getComputedStyle(viewer).backgroundColor;
-
-    exportWrapper.appendChild(clone);
-    document.body.appendChild(exportWrapper);
-
-    const canvas = await html2canvas(exportWrapper,{
+    const canvas = await html2canvas(viewer,{
         scale:2,
-        backgroundColor:"#0f1117",
+        backgroundColor:null,
         useCORS:true
     });
-
-    exportWrapper.remove();
 
     const link = document.createElement("a");
     link.download = (char.name || "character") + ".png";
@@ -694,5 +605,6 @@ downloadBtn.onclick = async ()=>{
 };
 
 </script>
+
 </body>
 </html>
