@@ -38,17 +38,19 @@ header{
     border-bottom:1px solid #2a2f3d;
 }
 
-.search-box{
+#searchInput{
     margin-top:12px;
-}
-
-.search-box input{
     width:100%;
     padding:12px;
     border-radius:var(--radius);
     border:none;
     background:var(--bg-accent);
     color:white;
+    font-size:14px;
+}
+
+#searchInput::placeholder{
+    color:var(--text-muted);
 }
 
 /* FOLDER BAR */
@@ -196,9 +198,9 @@ header{
     
     <h1>Characters</h1>
 
-    <div class="search-box">
-        <input type="text" placeholder="Search Characters or #Tags (Later)">
-    </div>
+<input id="searchInput" type="text" placeholder="Search Characters or #Tags">
+
+
 </header>
 
 
@@ -240,45 +242,92 @@ header{
 </a>
 
 <!-- JAVA SCRIPT -->
-<!-- CHARACTER LOADER -->
 <script>
 const list = document.getElementById("characterList");
+const searchInput = document.getElementById("searchInput");
 
 let characters = JSON.parse(localStorage.getItem("characters")) || [];
 
-list.innerHTML = "";
-
-characters.forEach((char, index) => {
+/* ===== CARD CREATOR (YOUR CODE WRAPPED) ===== */
+function createCard(char, index){
 
     const card = document.createElement("div");
     card.className = "card";
 
-   card.innerHTML = `
-<div class="card-content">
+    card.innerHTML = `
+    <div class="card-content">
 
-    ${char.image 
-        ? `<img src="${char.image}" class="avatar">`
-        : `<div class="avatar"></div>`
-    }
+        ${char.image 
+            ? `<img src="${char.image}" class="avatar">`
+            : `<div class="avatar"></div>`
+        }
 
-    <div class="card-text">
-        <div class="card-title">${char.name || "Unnamed Character"}</div>
-        <div class="card-desc">${char.desc || ""}</div>
-        <div class="card-tags">${char.tags || ""}</div>
+        <div class="card-text">
+            <div class="card-title">${char.name || "Unnamed Character"}</div>
+            <div class="card-desc">${char.desc || ""}</div>
+            <div class="card-tags">${char.tags || ""}</div>
+        </div>
+
     </div>
+    `;
 
-</div>
-`;
-
-    // CLICK CARD
     card.addEventListener("click", () => {
         localStorage.setItem("editingCharacterIndex", index);
         window.location.href = "character-manager.html";
     });
 
-    list.appendChild(card);
-});
-</script>
+    return card;
+}
 
+/* ===== RENDER LIST ===== */
+function renderList(array){
+
+    list.innerHTML = "";
+
+    if(array.length === 0){
+        list.innerHTML = "<p style='color:var(--text-muted)'>No characters found.</p>";
+        return;
+    }
+
+    array.forEach(char => {
+        const originalIndex = characters.indexOf(char);
+        list.appendChild(createCard(char, originalIndex));
+    });
+}
+
+/* ===== SEARCH ===== */
+function searchCharacters(){
+
+    const query = searchInput.value.toLowerCase().trim();
+
+    if(!query){
+        renderList(characters);
+        return;
+    }
+
+    const filtered = characters.filter(char => {
+
+        const name = (char.name || "").toLowerCase();
+        const tags = (char.tags || "").toLowerCase();
+
+        // hashtag priority search
+        if(query.startsWith("#")){
+            return tags.includes(query);
+        }
+
+        return name.includes(query) || tags.includes(query);
+    });
+
+    renderList(filtered);
+}
+
+/* ===== EVENT ===== */
+if(searchInput){
+    searchInput.addEventListener("input", searchCharacters);
+}
+
+/* ===== INITIAL LOAD ===== */
+renderList(characters);
+</script>
 </body>
 </html>
