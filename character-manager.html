@@ -3,239 +3,229 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Character Manager</title>
+<title>Characters - World Builder</title>
 
 <style>
-/* =========================
-   THEME TOKENS
-========================= */
 :root{
     --bg-main:#0f1117;
     --bg-card:#1a1d26;
     --bg-accent:#232734;
-
+    --text-main:#e6e9ef;
+    --text-muted:#9aa3b2;
     --accent:#5aa2ff;
-    --danger:#ff5a7a;
-
     --radius:14px;
-
-    --space-xs:6px;
-    --space-sm:10px;
-    --space-md:16px;
-    --space-lg:24px;
-
-    --transition:0.18s ease;
 }
 
-/* =========================
-   BASE
-========================= */
 *{
     box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:system-ui, sans-serif;
 }
 
 body{
     background:var(--bg-main);
-    color:white;
-    font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    padding:var(--space-lg);
-    line-height:1.4;
+    color:var(--text-main);
+    padding-bottom:80px;
 }
 
-/* =========================
-   CARD LAYOUT (Optional)
-========================= */
-.card{
+/* HEADER */
+header{
+    padding:18px;
     background:var(--bg-card);
-    border-radius:var(--radius);
-    padding:var(--space-lg);
+    position:sticky;
+    top:0;
+    border-bottom:1px solid #2a2f3d;
 }
 
-/* =========================
-   INPUTS / TEXTAREAS / SELECT
-========================= */
-input,
-textarea,
-select{
+#searchInput{
+    margin-top:12px;
     width:100%;
-    padding:14px;
-    margin-bottom:var(--space-md);
+    padding:12px;
     border-radius:var(--radius);
     border:none;
-    background:var(--bg-card);
+    background:var(--bg-accent);
     color:white;
     font-size:14px;
-
-    transition:var(--transition);
-    outline:none;
 }
 
-/* Focus glow */
-input:focus,
-textarea:focus,
-select:focus{
-    background:var(--bg-accent);
-    box-shadow:0 0 0 2px var(--accent);
+#searchInput::placeholder{
+    color:var(--text-muted);
 }
 
-/* Textarea usability */
-textarea{
-    resize:vertical;
-    min-height:120px;
-}
-
-/* Select reset */
-select{
-    appearance:none;
-    cursor:pointer;
-}
-
-/* =========================
-   BUTTON SYSTEM
-========================= */
-button{
-    width:100%;
-    padding:16px;
-    border:none;
-    border-radius:var(--radius);
-    margin-bottom:12px;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-
-    transition:var(--transition);
-}
-
-/* Variants */
-.btn-primary{
-    background:var(--accent);
-}
-
-.btn-danger{
-    background:var(--danger);
-}
-
-/* Hover / Active */
-button:hover{
-    transform:translateY(-1px);
-    filter:brightness(1.05);
-}
-
-button:active{
-    transform:translateY(0);
-    filter:brightness(.95);
-}
-
-/* =========================
-   AVATAR PREVIEW
-========================= */
-.avatarPreview{
-    width:140px;
-    height:140px;
-    border-radius:50%;
-    object-fit:cover;
-    background:var(--bg-accent);
-    display:block;
-    margin:0 auto var(--space-md) auto;
-}
-
-/* =========================
-   CANVAS EDITOR
-========================= */
-#editorContainer{
-    display:none;
-    margin-bottom:var(--space-lg);
-}
-
-canvas{
-    width:260px;
-    height:260px;
-    border-radius:50%;
-    display:block;
-    margin:0 auto var(--space-sm) auto;
-    background:#000;
-}
-
-#zoomSlider{
-    width:100%;
-    margin-bottom:var(--space-sm);
-}
-
-/* =========================
-   UTILITY HELPERS
-========================= */
-.center{
+/* FOLDER BAR */
+.folder-bar{
     display:flex;
-    justify-content:center;
+    gap:10px;
+    overflow-x:auto;
+    padding:14px;
+}
+
+.folder{
+    background:var(--bg-accent);
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:14px;
+}
+
+/* CARDS */
+.section{
+    padding:16px;
+}
+
+.card{
+    background:var(--bg-card);
+    padding:16px;
+    border-radius:var(--radius);
+    margin-bottom:14px;
+    border:1px solid #2a2f3d;
+    transition:transform .15s ease, border-color .15s ease;
+}
+
+.card-title{
+    font-weight:600;
+    font-size:17px;
+}
+
+.card-tags{
+    font-size:12px;
+    color:var(--text-muted);
+    margin-top:6px;
+}
+
+.card:hover{
+    transform:translateY(-2px);
+    border-color:var(--accent);
+}
+
+
+/* BOTTOM NAV */
+.bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    height:65px;
+    background:var(--bg-card);
+    border-top:1px solid #2a2f3d;
+    display:flex;
+    justify-content:space-around;
     align-items:center;
 }
 
-.stack > * + *{
-    margin-top:var(--space-md);
+.nav-btn{
+    font-size:12px;
+    color:var(--text-muted);
+    text-decoration:none;
 }
 
-.hidden{
-    display:none !important;
+.nav-btn.active{
+    color:var(--accent);
 }
 
-/* =========================
-   MOBILE TWEAKS
-========================= */
-@media (max-width:480px){
-    body{
-        padding:var(--space-md);
-    }
 
-    canvas{
-        width:220px;
-        height:220px;
-    }
+/* FLOATING ACTION BUTTON */
+.fab{
+    position:fixed;
+    bottom:90px;
+    right:20px;
 
-    .avatarPreview{
-        width:120px;
-        height:120px;
-    }
+    width:60px;
+    height:60px;
+    border-radius:50%;
+
+    background:var(--accent);
+    color:white;
+
+    font-size:32px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-decoration:none;
+
+    box-shadow:0 6px 20px rgba(0,0,0,0.4);
+    transition:transform 0.3s ease;
 }
 
-/* Base button */
-.btn{
-    width:100%;
-    padding:16px;
-    border:none;
-    border-radius:var(--radius);
-    font-size:16px;
-    font-weight:600;
+/* ROTATE EFFECT WHEN PRESSED */
+.fab:active{
+    transform:rotate(90deg) scale(0.95);
+}
+
+/* AVATAR CSS */
+.avatar{
+    width:70px;
+    height:70px;
+    border-radius:50%;
+    object-fit:cover;
+    background:var(--bg-accent);
+    margin-bottom:10px;
+    display:block;
+}
+
+/* TEXT WRAPPER */
+
+.card-content{
+    display:flex;
+    gap:16px;
+    align-items:flex-start;
+}
+
+.card-text{
+    flex:1;
+}
+
+.card-desc{
+    color:var(--text-muted);
+    margin-top:4px;
+    line-height:1.4;
+    font-size:14px;
+}
+
+/* FOLDER */
+
+.folder{
+    background:var(--bg-accent);
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:14px;
     cursor:pointer;
-    transition:0.18s ease;
+    white-space:nowrap;
+    transition:.15s;
 }
 
-/* SAVE */
-.saveBtn{
+.folder.active{
+    background:var(--accent);
+    color:white;
+}
+#addFolderBtn:hover{
+    color:white;
+    background:var(--accent);
+}
+
+/* ========== BUTTON STYLING ============= */
+
+.editBtn, .viewBtn{
+    border:none;
+    background:var(--bg-accent);
+    color:var(--text-muted);
+    border-radius:8px;
+    width:36px;
+    height:36px;
+    cursor:pointer;
+    font-size:16px;
+    transition:.15s;
+}
+
+.editBtn:hover{
     background:var(--accent);
     color:white;
 }
 
-.saveBtn:hover{
-    filter:brightness(1.1);
-}
-
-.saveBtn:active{
-    filter:brightness(.9);
-}
-
-
-/* DELETE */
-.deleteBtn{
-    background:var(--danger);
+.viewBtn:hover{
+    background:var(--accent);
     color:white;
-}
-
-.deleteBtn:hover{
-    filter:brightness(1.1);
-}
-
-.deleteBtn:active{
-    filter:brightness(.9);
 }
 
 
@@ -243,662 +233,295 @@ canvas{
 </head>
 
 <body>
+   
 
-<h1>Edit Character</h1>
+<header>
+    
+<!-- MAIN BODY -->
+    
+    <h1>Characters</h1>
 
-<img id="avatarPreview" class="avatarPreview">
-
-<input type="file" id="charImage" accept="image/*">
-
-<div id="editorContainer">
-    <canvas id="imageCanvas" width="300" height="300"></canvas>
-    <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1">
-    <button type="button" id="useImageBtn">Use Image</button>
-</div>
-
-<input id="charName" placeholder="Name">
-<textarea id="charDesc" placeholder="Description"></textarea>
-<input id="charTags" placeholder="Tags">
-<input id="charFolder" placeholder="Folder">
-
-<h2 style="margin-top:20px;">Life Timeline</h2>
-
-<input type="date" id="charBirthDate" placeholder="Birth Date">
-<input type="date" id="charDeathDate" placeholder="Death Date">
+<input id="searchInput" type="text" placeholder="Search Characters or #Tags">
 
 
-<div id="autoStats" style="
-background:var(--bg-card);
-padding:14px;
-border-radius:var(--radius);
-margin-bottom:16px;
-font-size:14px;
-color:#9aa3b2;
-">
+</header>
+
+<div class="folder-bar" id="folderBar"></div>
+
+<div style="padding:0 14px 10px 14px;">
+    <button id="addFolderBtn" style="
+        width:100%;
+        padding:10px;
+        border-radius:999px;
+        border:none;
+        background:var(--bg-accent);
+        color:var(--text-muted);
+        cursor:pointer;
+    ">
+        + Add Folder
+    </button>
 </div>
 
 
-<h2 style="margin-top:20px;">Custom Fields</h2>
-
-<div id="customFieldsList"></div>
-
-<button type="button" id="addCustomFieldBtn">
-+ Add Custom Field
-</button>
+<section class="section">
 
 
 
-<h2 style="margin-top:20px;">Lore Metadata</h2>
+<!-- ===== CHARACTER LIST ===== -->
+<section class="section">
+    <h2>Character List</h2>
 
-<input id="charSpecies" placeholder="Species">
-<input id="charFaction" placeholder="Faction">
-<input id="charOrigin" placeholder="Origin World / Location">
+    <div id="characterList"></div>
 
-<select id="charAlignment">
-    <option value="">Alignment</option>
-    <option>Hero</option>
-    <option>Neutral</option>
-    <option>Villain</option>
-    <option>Anti-Hero</option>
-    <option>Anti-Villain</option>
-</select>
+</section>
 
-<h2 style="margin-top:20px;">Relationships</h2>
 
-<div id="relationshipList"></div>
-
-<button type="button" id="addRelationshipBtn">
-+ Add Relationship
-</button>
-
-<button class="saveBtn" id="saveBtn">Save Changes</button>
-<button class="btn deleteBtn" id="deleteCharacterBtn">
-    Delete Character
-</button>
+<!-- ===== BOTTOM NAV ===== -->
+<nav class="bottom-nav">
+    <a href="index.html" class="nav-btn active">Home</a>
+    <a href="events.html" class="nav-btn">Events</a>
+    <a href="character.html" class="nav-btn">Characters</a>
+    <a href="world.html" class="nav-btn">World</a>
+    <a href="#" class="nav-btn">Folders</a>
+</nav>
 
 
 
+
+<!-- FLOATING ADD CHARACTER BUTTON -->
+<a href="add-character.html" class="fab" id="fabBtn">
+    +
+</a>
 
 <!-- JAVA SCRIPT -->
 
-
 <script>
-/* ===== LOAD CHARACTER ===== */
-let characters = JSON.parse(localStorage.getItem("characters")) || [];
-let index = localStorage.getItem("editingCharacterIndex");
-let char = characters[index];
-let savedImageData = char?.image || null;
-customFields: [
-  {
-    id: "unique-id",
-    label: "Magic Affinity",
-    type: "text", // text | longtext | number | boolean | select
-    value: "",
-    options: [] // only used if type === "select"
-  }
-]
+
+/* =========================
+   GLOBAL STATE
+========================= */
+const list = document.getElementById("characterList");
+const searchInput = document.getElementById("searchInput");
+const folderBar = document.getElementById("folderBar");
+const addFolderBtn = document.getElementById("addFolderBtn");
+
+let characters = [];
+let savedFolders = JSON.parse(localStorage.getItem("folders")) || [];
+let activeFolder = "All";
 
 
-/* ===== ELEMENTS ===== */
-const avatarPreview = document.getElementById("avatarPreview");
-const fileInput = document.getElementById("charImage");
-const editor = document.getElementById("editorContainer");
-const canvas = document.getElementById("imageCanvas");
-const ctx = canvas.getContext("2d");
-const zoomSlider = document.getElementById("zoomSlider");
-const useBtn = document.getElementById("useImageBtn");
-const birthInput = document.getElementById("charBirthDate");
-const deathInput = document.getElementById("charDeathDate");
-const autoStats = document.getElementById("autoStats");
-
-const speciesInput = document.getElementById("charSpecies");
-const factionInput = document.getElementById("charFaction");
-const originInput = document.getElementById("charOrigin");
-const alignmentInput = document.getElementById("charAlignment");
-
-const relationshipList = document.getElementById("relationshipList");
-const addRelationshipBtn = document.getElementById("addRelationshipBtn");
-const deleteBtn = document.getElementById("deleteCharacterBtn");
-const customFieldsList = document.getElementById("customFieldsList");
-const addCustomFieldBtn = document.getElementById("addCustomFieldBtn");
+/* =========================
+   LOAD CHARACTERS (SAFE)
+========================= */
+function loadCharacters(){
+    characters = JSON.parse(localStorage.getItem("characters")) || [];
+}
 
 
+/* =========================
+   CARD CREATOR
+========================= */
+function createCard(char, index){
 
+    const card = document.createElement("div");
+    card.className = "card";
 
-let relationships = char?.relationships || [];
-let customFields = char?.customFields || [];
+    card.innerHTML = `
+    <div class="card-content">
 
+        ${char.image 
+            ? `<img src="${char.image}" class="avatar">`
+            : `<div class="avatar"></div>`
+        }
 
+        <div class="card-text">
+            <div class="card-title">${char.name || "Unnamed Character"}</div>
+            <div class="card-desc">${char.desc || ""}</div>
+            <div class="card-tags">${char.tags || ""}</div>
+        </div>
 
+        <div style="display:flex; flex-direction:column; gap:8px;">
+            <button class="editBtn" title="Edit">✏</button>
+            <button class="viewBtn" title="View">👁</button>
+        </div>
 
+    </div>
+    `;
 
-/* ===== LOAD DATA INTO FORM ===== */
-if(char){
-    charName.value = char.name || "";
-    charDesc.value = char.desc || "";
-    charTags.value = char.tags || "";
-    charFolder.value = char.folder || "";
-    birthInput.value = char.birthDate || "";
-deathInput.value = char.deathDate || "";
-speciesInput.value = char.species || "";
-factionInput.value = char.faction || "";
-originInput.value = char.origin || "";
-alignmentInput.value = char.alignment || "";
+    // EDIT BUTTON
+    card.querySelector(".editBtn").addEventListener("click", (e)=>{
+        e.stopPropagation();
+localStorage.setItem("editingCharacterId", character.id);
+        window.location.href = "character-manager.html";
+    });
 
+    // VIEW BUTTON
+    card.querySelector(".viewBtn").addEventListener("click", (e)=>{
+        e.stopPropagation();
+        localStorage.setItem("viewingCharacterIndex", character.id);
+        window.location.href = "character-viewer.html";
+    });
 
+    return card;
+}
 
-    if(char.image){
-        avatarPreview.src = char.image;
+/* =========================
+   RENDER LIST
+========================= */
+function renderList(array){
+
+    list.innerHTML = "";
+
+    if(array.length === 0){
+        list.innerHTML = "<p style='color:var(--text-muted)'>No characters found.</p>";
+        return;
     }
-}
 
-/* ===== IMAGE EDITOR ===== */
-let img = new Image();
-let scale = 1;
-let posX = 0;
-let posY = 0;
-let dragging = false;
-let startX = 0;
-let startY = 0;
+    array.forEach(char => {
 
-fileInput.addEventListener("change", function(){
-    const file = fileInput.files[0];
-    if(!file) return;
+        // safer index lookup
+        const originalIndex = characters.findIndex(c =>
+            c.name === char.name &&
+            c.desc === char.desc &&
+            c.tags === char.tags &&
+            c.image === char.image
+        );
 
-    const reader = new FileReader();
-
-    reader.onload = function(e){
-        img.onload = function(){
-            editor.style.display = "block";
-            scale = Math.max(
-    canvas.width / img.width,
-    canvas.height / img.height
-);
-            posX = (canvas.width - img.width * scale) / 2;
-posY = (canvas.height - img.height * scale) / 2;
-     
-        };
-        img.src = e.target.result;
-    };
-
-    reader.readAsDataURL(file);
-});
-
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(150,150,150,0,Math.PI*2);
-    ctx.clip();
-
-    ctx.drawImage(img, posX, posY, img.width*scale, img.height*scale);
-    ctx.restore();
-}
-
-canvas.addEventListener("mousedown", startDrag);
-canvas.addEventListener("touchstart", startDrag);
-
-function startDrag(e){
-    dragging = true;
-
-    let rect = canvas.getBoundingClientRect();
-
-    startX = e.touches
-        ? e.touches[0].clientX - rect.left
-        : e.clientX - rect.left;
-
-    startY = e.touches
-        ? e.touches[0].clientY - rect.top
-        : e.clientY - rect.top;
+        list.appendChild(createCard(char, originalIndex));
+    });
 }
 
 
-canvas.addEventListener("mousemove", dragMove);
-canvas.addEventListener("touchmove", dragMove);
+/* =========================
+   FOLDER SYSTEM
+========================= */
+function getFolders(){
 
-function dragMove(e){
-    if(!dragging) return;
+    const folders = new Set(["All"]);
 
-    let rect = canvas.getBoundingClientRect();
+    savedFolders.forEach(f => folders.add(f));
 
-    let x = e.touches
-        ? e.touches[0].clientX - rect.left
-        : e.clientX - rect.left;
+    characters.forEach(c=>{
+        if(c.folder && c.folder.trim() !== ""){
+            folders.add(c.folder);
+        }
+    });
 
-    let y = e.touches
-        ? e.touches[0].clientY - rect.top
-        : e.clientY - rect.top;
-
-    posX += x - startX;
-    posY += y - startY;
-
-    startX = x;
-    startY = y;
-
-    clampPosition();
-    draw();
+    return [...folders];
 }
 
-canvas.addEventListener("mouseup", ()=> dragging=false);
-canvas.addEventListener("touchend", ()=> dragging=false);
-canvas.addEventListener("touchmove", e=>{
-    if(dragging) e.preventDefault();
-}, { passive:false });
+function buildFolderBar(){
 
+    folderBar.innerHTML = "";
 
-zoomSlider.addEventListener("input", ()=>{
-    scale = parseFloat(zoomSlider.value);
-    draw();
-});
+    const folders = getFolders();
 
-useBtn.addEventListener("click", ()=>{
-    savedImageData = canvas.toDataURL("image/png");
-    avatarPreview.src = savedImageData;
-    editor.style.display = "none";
-});
+    folders.forEach(folderName => {
 
+        const btn = document.createElement("div");
+        btn.className = "folder";
+        btn.textContent = folderName;
 
+        if(folderName === activeFolder){
+            btn.classList.add("active");
+        }
 
+        btn.addEventListener("click", ()=>{
+            activeFolder = folderName;
+            buildFolderBar();
+            applyFilters();
+        });
 
-// DRAG BOUNDARIES
-
-function clampPosition(){
-    const imgW = img.width * scale;
-    const imgH = img.height * scale;
-
-    // Prevent empty space inside circle
-    const minX = canvas.width - imgW;
-    const minY = canvas.height - imgH;
-
-    posX = Math.min(0, Math.max(minX, posX));
-    posY = Math.min(0, Math.max(minY, posY));
+        folderBar.appendChild(btn);
+    });
 }
 
-/* BIRTH AND DEATH INPUT */
 
-birthInput.addEventListener("input", updateAutoStats);
-deathInput.addEventListener("input", updateAutoStats);
+/* =========================
+   FILTER PIPELINE
+========================= */
+function applyFilters(){
 
+    loadCharacters();
 
-/* DATE AND DEATH */
+    let filtered = [...characters];
 
-
-function updateAutoStats(){
-
-    const birth = birthInput.value ? new Date(birthInput.value) : null;
-    const death = deathInput.value ? new Date(deathInput.value) : null;
-
-    let status = "Alive";
-    let age = "Unknown";
-
-    if(birth){
-        const endDate = death || new Date();
-
-        age = Math.floor(
-            (endDate - birth) / (1000 * 60 * 60 * 24 * 365.25)
+    /* Folder filter */
+    if(activeFolder !== "All"){
+        filtered = filtered.filter(c =>
+            (c.folder || "").toLowerCase() === activeFolder.toLowerCase()
         );
     }
 
-    if(death){
-        status = "Deceased";
+    /* Search filter */
+    const query = searchInput.value.toLowerCase().trim();
+
+    if(query){
+        filtered = filtered.filter(char => {
+
+            const name = (char.name || "").toLowerCase();
+            const tags = (char.tags || "").toLowerCase();
+
+            if(query.startsWith("#")){
+                return tags.includes(query);
+            }
+
+            return name.includes(query) || tags.includes(query);
+        });
     }
 
-    autoStats.innerHTML = `
-    Status: <b>${status}</b><br>
-    Age: <b>${age}</b>
-    `;
-
-    return { status, age };
+    renderList(filtered);
 }
 
-updateAutoStats();
 
-/* ===== SAVE ===== */
-saveBtn.onclick = () => {
+/* =========================
+   ADD FOLDER
+========================= */
+addFolderBtn.addEventListener("click", ()=>{
 
-    const auto = updateAutoStats();
+    const name = prompt("Folder name:");
 
-    characters[index] = {
-        name: charName.value,
-        desc: charDesc.value,
-        tags: charTags.value,
-        folder: charFolder.value,
-        image: savedImageData,
+    if(!name) return;
 
-        birthDate: birthInput.value || null,
-        deathDate: deathInput.value || null,
+    const trimmed = name.trim();
 
-        status: auto.status,
-        age: auto.age,
-        species: speciesInput.value,
-        faction: factionInput.value,
-        origin: originInput.value,
-        alignment: alignmentInput.value,
-        relationships: relationships,
-        customFields: customFields,
+    if(trimmed === "") return;
 
+    if(savedFolders.includes(trimmed)){
+        alert("Folder already exists.");
+        return;
+    }
 
+    savedFolders.push(trimmed);
+    localStorage.setItem("folders", JSON.stringify(savedFolders));
 
-        
-        
-    };
-
-    localStorage.setItem("characters", JSON.stringify(characters));
-    window.location.href = "character.html";
-};
-
-/* ALIGNMENT */
-
-function updateAlignmentStyle(){
-
-    alignmentInput.classList.remove(
-        "alignment-hero",
-        "alignment-villain",
-        "alignment-neutral",
-        "alignment-anti-hero",
-        "alignment-anti-villain"
-    );
-
-    const val = alignmentInput.value.toLowerCase();
-
-    if(val === "hero") alignmentInput.classList.add("alignment-hero");
-    if(val === "villain") alignmentInput.classList.add("alignment-villain");
-    if(val === "neutral") alignmentInput.classList.add("alignment-neutral");
-    if(val === "anti-hero") alignmentInput.classList.add("alignment-anti-hero");
-    if(val === "anti-villain") alignmentInput.classList.add("alignment-anti-villain");
-    alignmentInput.addEventListener("change", updateAlignmentStyle);
-    updateAlignmentStyle();
-
-}
-
-/* ===== RELATIONSHIPS ===== */
-
-addRelationshipBtn.addEventListener("click", ()=>{
-    relationships.push({
-        name:"",
-        type:""
-    });
-    renderRelationships();
-});
-
-function renderRelationships(){
-
-    relationshipList.innerHTML = "";
-
-    relationships.forEach((rel, i)=>{
-
-        const row = document.createElement("div");
-
-        row.style.display = "flex";
-        row.style.gap = "8px";
-        row.style.marginBottom = "10px";
-
-        row.innerHTML = `
-        <input placeholder="Name"
-            value="${rel.name || ""}"
-            data-index="${i}"
-            class="rel-name">
-
-        <input placeholder="Type (Friend, Rival, etc)"
-            value="${rel.type || ""}"
-            data-index="${i}"
-            class="rel-type">
-
-        <button data-index="${i}" class="rel-delete" style="
-            width:60px;
-            background:var(--danger);
-        ">X</button>
-        `;
-
-        relationshipList.appendChild(row);
-    });
-
-    bindRelationshipEvents();
-}
-
-function bindRelationshipEvents(){
-
-    document.querySelectorAll(".rel-name").forEach(el=>{
-        el.addEventListener("input", e=>{
-            const i = e.target.dataset.index;
-            relationships[i].name = e.target.value;
-        });
-    });
-
-    document.querySelectorAll(".rel-type").forEach(el=>{
-        el.addEventListener("input", e=>{
-            const i = e.target.dataset.index;
-            relationships[i].type = e.target.value;
-        });
-    });
-
-    document.querySelectorAll(".rel-delete").forEach(btn=>{
-        btn.addEventListener("click", e=>{
-            const i = e.target.dataset.index;
-            relationships.splice(i,1);
-            renderRelationships();
-        });
-    });
-}
-
-renderRelationships();
-
-
-/* =====================
-    DELETE CHARACTERS
-=========================*/
-deleteBtn.addEventListener("click", () => {
-
-    const confirmDelete = confirm(
-        "Are you sure you want to delete this character? This cannot be undone."
-    );
-
-    if (!confirmDelete) return;
-
-    // Remove character from array
-    characters.splice(index, 1);
-
-    // Save updated array
-    localStorage.setItem("characters", JSON.stringify(characters));
-
-    alert("Character deleted.");
-
-    // Redirect back to list
-    window.location.href = "character.html";
-});
-
-/* ============ FIELD BUTTON ============== */
-
-addCustomFieldBtn.addEventListener("click", () => {
-
-    customFields.push({
-        id: crypto.randomUUID(),
-        label: "",
-        type: "text",
-        value: "",
-        options: []
-    });
-
-    renderCustomFields();
+    buildFolderBar();
 });
 
 
-/* RENDERER */
+/* =========================
+   EVENTS
+========================= */
+searchInput.addEventListener("input", applyFilters);
 
 
-function renderCustomFields(){
+/* Refresh if returning from manager page */
+window.addEventListener("focus", () => {
+    init();
+});
 
-    customFieldsList.innerHTML = "";
 
-    customFields.forEach((field, i) => {
-
-        const wrapper = document.createElement("div");
-        wrapper.style.background = "var(--bg-card)";
-        wrapper.style.padding = "12px";
-        wrapper.style.borderRadius = "var(--radius)";
-        wrapper.style.marginBottom = "12px";
-
-        wrapper.innerHTML = `
-            <input 
-                placeholder="Field Label"
-                value="${field.label}"
-                data-index="${i}"
-                class="cf-label">
-
-            <select data-index="${i}" class="cf-type">
-                <option value="text" ${field.type==="text"?"selected":""}>Text</option>
-                <option value="longtext" ${field.type==="longtext"?"selected":""}>Long Text</option>
-                <option value="number" ${field.type==="number"?"selected":""}>Number</option>
-                <option value="boolean" ${field.type==="boolean"?"selected":""}>True / False</option>
-                <option value="select" ${field.type==="select"?"selected":""}>Dropdown</option>
-            </select>
-
-            <div class="cf-value-container" data-index="${i}"></div>
-
-            <button data-index="${i}" class="cf-delete" style="
-                margin-top:8px;
-                background:var(--danger);
-            ">Delete</button>
-        `;
-
-        customFieldsList.appendChild(wrapper);
-    });
-
-    bindCustomFieldEvents();
-    renderCustomFieldValues();
+/* =========================
+   INIT
+========================= */
+function init(){
+    loadCharacters();
+    buildFolderBar();
+    applyFilters();
 }
 
-function renderCustomFieldValues(){
-
-    document.querySelectorAll(".cf-value-container").forEach(container => {
-
-        const i = container.dataset.index;
-        const field = customFields[i];
-
-        container.innerHTML = "";
-
-        if(field.type === "text"){
-            container.innerHTML = `
-                <input placeholder="Value"
-                value="${field.value || ""}"
-                data-index="${i}"
-                class="cf-value">
-            `;
-        }
-
-        if(field.type === "longtext"){
-            container.innerHTML = `
-                <textarea placeholder="Value"
-                data-index="${i}"
-                class="cf-value">${field.value || ""}</textarea>
-            `;
-        }
-
-        if(field.type === "number"){
-            container.innerHTML = `
-                <input type="number"
-                value="${field.value || ""}"
-                data-index="${i}"
-                class="cf-value">
-            `;
-        }
-
-        if(field.type === "boolean"){
-            container.innerHTML = `
-                <label style="display:flex; gap:8px; align-items:center;">
-                    <input type="checkbox"
-                    ${field.value ? "checked" : ""}
-                    data-index="${i}"
-                    class="cf-value-bool">
-                    True
-                </label>
-            `;
-        }
-
-        if(field.type === "select"){
-
-            const optionsString = field.options?.join(", ") || "";
-
-            container.innerHTML = `
-                <input placeholder="Options (comma separated)"
-                    value="${optionsString}"
-                    data-index="${i}"
-                    class="cf-options">
-
-                <select data-index="${i}" class="cf-value-select">
-                    ${field.options.map(opt =>
-                        `<option ${opt===field.value?"selected":""}>${opt}</option>`
-                    ).join("")}
-                </select>
-            `;
-        }
-    });
-}
-
-function bindCustomFieldEvents(){
-
-    document.querySelectorAll(".cf-label").forEach(el=>{
-        el.addEventListener("input", e=>{
-            const i = e.target.dataset.index;
-            customFields[i].label = e.target.value;
-        });
-    });
-
-    document.querySelectorAll(".cf-type").forEach(el=>{
-        el.addEventListener("change", e=>{
-            const i = e.target.dataset.index;
-            customFields[i].type = e.target.value;
-            customFields[i].value = "";
-            renderCustomFields();
-        });
-    });
-
-    document.querySelectorAll(".cf-delete").forEach(btn=>{
-        btn.addEventListener("click", e=>{
-            const i = e.target.dataset.index;
-            customFields.splice(i,1);
-            renderCustomFields();
-        });
-    });
-
-    document.querySelectorAll(".cf-value").forEach(el=>{
-        el.addEventListener("input", e=>{
-            const i = e.target.dataset.index;
-            customFields[i].value = e.target.value;
-        });
-    });
-
-    document.querySelectorAll(".cf-value-bool").forEach(el=>{
-        el.addEventListener("change", e=>{
-            const i = e.target.dataset.index;
-            customFields[i].value = e.target.checked;
-        });
-    });
-
-    document.querySelectorAll(".cf-options").forEach(el=>{
-        el.addEventListener("input", e=>{
-            const i = e.target.dataset.index;
-            customFields[i].options = e.target.value
-                .split(",")
-                .map(o=>o.trim())
-                .filter(o=>o);
-            renderCustomFieldValues();
-        });
-    });
-
-    document.querySelectorAll(".cf-value-select").forEach(el=>{
-        el.addEventListener("change", e=>{
-            const i = e.target.dataset.index;
-            customFields[i].value = e.target.value;
-        });
-    });
-}
-
-renderCustomFields();
-
+init();
 
 </script>
-
 </body>
 </html>
