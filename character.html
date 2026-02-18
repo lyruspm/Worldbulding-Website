@@ -182,11 +182,6 @@ header{
 
 </section>
 
-<section class="section" id="characterList">
-</section>
-
-
-</section>
 
 <!-- ===== BOTTOM NAV ===== -->
 <nav class="bottom-nav">
@@ -197,28 +192,24 @@ header{
     <a href="#" class="nav-btn">Folders</a>
 </nav>
 
+
+
+
 <!-- FLOATING ADD CHARACTER BUTTON -->
 <a href="add-character.html" class="fab" id="fabBtn">
     +
 </a>
 
-
 <!-- JAVA SCRIPT -->
-
-<script>
-const fab = document.getElementById("fabBtn");
-
-fab.addEventListener("click", function(){
-    fab.style.transform = "rotate(180deg)";
-});
-</script>
-
+<!-- CHARACTER LOADER -->
 <script>
 const list = document.getElementById("characterList");
 
 let characters = JSON.parse(localStorage.getItem("characters")) || [];
 
-characters.forEach(char => {
+list.innerHTML = "";
+
+characters.forEach((char, index) => {
 
     const card = document.createElement("div");
     card.className = "card";
@@ -229,11 +220,15 @@ characters.forEach(char => {
         <div class="card-tags">${char.tags || ""}</div>
     `;
 
+    // CLICK CARD
+    card.addEventListener("click", () => {
+        localStorage.setItem("editingCharacterIndex", index);
+        window.location.href = "character-manager.html";
+    });
+
     list.appendChild(card);
 });
 </script>
-
-
 
 </body>
 </html>
