@@ -22,94 +22,132 @@ body{
     padding:30px;
 }
 
-/* MAIN WRAPPER */
+
+/* ================= VIEWER CARD ================= */
+
 .viewer{
-    background: var(--viewer-bg, rgba(26,29,38,0.75));
-    backdrop-filter: blur(18px);
+    --viewer-bg:#1a1d26;
+
+    background:var(--viewer-bg);
+    backdrop-filter: blur(22px) saturate(140%);
 
     border-radius:28px;
-    padding:34px;
+    padding:36px;
 
-    border:1px solid rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,.06);
 
     box-shadow:
         0 40px 80px rgba(0,0,0,.45),
-        inset 0 0 0 1px rgba(255,255,255,0.02);
+        inset 0 1px 0 rgba(255,255,255,.04);
 
     position:relative;
     overflow:hidden;
+
+    transition:
+        background .35s ease,
+        color .25s ease,
+        box-shadow .25s ease;
 }
 
 
-/* HEADER */
+/* ================= HERO ================= */
+
 .hero{
     display:flex;
-    gap:24px;
+    gap:26px;
     align-items:center;
     flex-wrap:wrap;
 }
 
 .hero img{
-    width:180px;
-    height:180px;
+    width:170px;
+    height:170px;
     border-radius:50%;
     object-fit:cover;
 
     box-shadow:
-        0 0 0 4px rgba(90,162,255,.2),
-        0 12px 40px rgba(0,0,0,.5);
-}
-
-.hero-text{
-    flex:1;
+        0 0 0 5px rgba(255,255,255,.05),
+        0 20px 50px rgba(0,0,0,.6);
 }
 
 .name{
-    font-size:34px;
-    font-weight:800;
-    letter-spacing:.5px;
+    font-size:36px;
+    font-weight:900;
+    letter-spacing:.4px;
 }
 
 .tags{
     margin-top:8px;
-    color:#9aa3b2;
+    font-size:14px;
+    opacity:.7;
 }
 
-/* SECTION CARDS */
-.section{
-    margin-top:26px;
-    padding:18px;
 
+/* ================= SECTIONS ================= */
+
+.section{
+    margin-top:24px;
+    padding:20px;
     border-radius:18px;
 
-    background:rgba(255,255,255,0.02);
-    border:1px solid rgba(255,255,255,0.05);
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(255,255,255,.06);
+
+    backdrop-filter: blur(10px);
 }
 
 .section-title{
-    font-size:13px;
-    letter-spacing:.12em;
+    font-size:12px;
+    letter-spacing:.18em;
     text-transform:uppercase;
-    color:#8e97aa;
+    opacity:.55;
     margin-bottom:10px;
 }
 
 .section-content{
     font-size:15px;
-    line-height:1.6;
+    line-height:1.65;
 }
 
-/* RELATIONSHIP CHIPS */
+
+/* ================= PILLS FIXED ================= */
+
 .relationship-chip{
-    display:inline-block;
-    padding:6px 12px;
-    border-radius:999px;
-    background:rgba(90,162,255,.15);
+    display:inline-flex;
+    align-items:center;
+
+    padding:7px 14px;
     margin:4px;
+
+    border-radius:999px;
+
     font-size:13px;
+    font-weight:600;
+
+    background:
+        linear-gradient(180deg,
+            rgba(255,255,255,.12),
+            rgba(255,255,255,.03)
+        );
+
+    border:1px solid rgba(255,255,255,.15);
+
+    backdrop-filter: blur(8px);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255,255,255,.25),
+        0 6px 16px rgba(0,0,0,.35);
+
+    transition:.2s;
 }
 
-/* DOWNLOAD BUTTON */
+.relationship-chip:hover{
+    transform:translateY(-1px);
+}
+
+
+/* ================= BUTTON ================= */
+
 .downloadBtn{
     margin-top:30px;
     width:100%;
@@ -122,75 +160,41 @@ body{
 
     color:white;
     font-size:16px;
-    font-weight:600;
+    font-weight:700;
 
     cursor:pointer;
 
-    box-shadow:0 10px 30px rgba(90,162,255,.25);
+    box-shadow:0 14px 40px rgba(90,162,255,.35);
     transition:.2s;
 }
 
 .downloadBtn:hover{
     transform:translateY(-2px);
-    box-shadow:0 18px 40px rgba(90,162,255,.35);
 }
 
 
-/* ================= GRADIENT ==============*/
-
-.bgPanel{
-    max-width:780px;
-    margin:auto;
-    margin-bottom:20px;
-    padding:20px;
-    border-radius:20px;
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.06);
-}
-
-.bgRow{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    margin-bottom:12px;
-}
-
-.bgRow input[type="text"]{
-    flex:1;
-}
-
-
-/* ================ BACKGROUND EFFECTS ============== */
-
-.viewer{
-    position:relative;
-    overflow:hidden;
-}
-
-.viewer::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-    opacity:0;
-    transition:.3s;
-}
+/* ================= EFFECTS ================= */
 
 /* NOISE */
 .viewer.noise::before{
+    content:"";
+    position:absolute;
+    inset:0;
     opacity:.08;
+    pointer-events:none;
     background-image:url("https://grainy-gradients.vercel.app/noise.svg");
 }
 
 /* GLOW */
-.viewer.glow::after{
+.viewer.glow::before{
     content:"";
     position:absolute;
     inset:-40%;
-    background:radial-gradient(circle at center,
-        rgba(255,255,255,.15),
-        transparent 60%);
     pointer-events:none;
+    background:
+        radial-gradient(circle at center,
+        rgba(255,255,255,.18),
+        transparent 60%);
 }
 
 /* PARTICLES */
@@ -198,20 +202,19 @@ body{
     content:"";
     position:absolute;
     inset:0;
-    background-image:
-        radial-gradient(circle, rgba(255,255,255,.08) 1px, transparent 1px);
-    background-size:60px 60px;
-    animation:particleMove 40s linear infinite;
     pointer-events:none;
+
+    background-image:
+        radial-gradient(circle, rgba(255,255,255,.09) 1px, transparent 1px);
+    background-size:60px 60px;
+
+    animation:particleMove 40s linear infinite;
 }
 
 @keyframes particleMove{
     from{ background-position:0 0; }
     to{ background-position:600px 600px; }
 }
-
-
-
 
 </style>
 </head>
@@ -317,6 +320,17 @@ if(!char){
     location.href = "character.html";
 }
 
+
+const vImage = document.getElementById("vImage");
+const vName = document.getElementById("vName");
+const vDesc = document.getElementById("vDesc");
+const vTags = document.getElementById("vTags");
+const vLore = document.getElementById("vLore");
+const vLife = document.getElementById("vLife");
+const vRelationships = document.getElementById("vRelationships");
+const downloadBtn = document.getElementById("downloadBtn");
+
+
 vImage.src = char.image || "";
 vName.textContent = char.name || "Unnamed";
 vDesc.textContent = char.desc || "-";
@@ -343,18 +357,28 @@ vRelationships.innerHTML = (char.relationships || [])
 
 
 /* DOWNLOAD PNG */
-downloadBtn.onclick = () => {
 
-    html2canvas(document.getElementById("viewerCard"), {
+downloadBtn.onclick = async () => {
+
+    const computed = getComputedStyle(viewer);
+    const originalBg = viewer.style.background;
+
+    /* Force solid fallback if gradient */
+    if(computed.backgroundImage !== "none"){
+        viewer.style.background = computed.backgroundColor || "#1a1d26";
+    }
+
+    const canvas = await html2canvas(viewer, {
         backgroundColor: null,
         useCORS: true
-    }).then(canvas=>{
-        const link = document.createElement("a");
-        link.download = (char.name || "character") + ".png";
-        link.href = canvas.toDataURL("image/png");
-        link.click();
     });
 
+    viewer.style.background = originalBg;
+
+    const link = document.createElement("a");
+    link.download = (char.name || "character") + ".png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
 };
 
 
@@ -484,24 +508,28 @@ function autoTextFromGradient(hexA, hexB){
 
 gradAHex.addEventListener("input", ()=>{
     let val = gradAHex.value.trim();
+
     if(!val.startsWith("#")) val = "#"+val;
 
     if(/^#[0-9A-F]{6}$/i.test(val)){
         gradA.value = val;
         applyGradient();
+        
+   if(val.length < 7) return;
+
     }
 });
 
-gradBHex.addEventListener("input", ()=>{
-    let val = gradBHex.value.trim();
+gradAHex.addEventListener("input", ()=>{
+    let val = gradAHex.value.trim();
+
+    if(val.length < 7) return;
+
     if(!val.startsWith("#")) val = "#"+val;
 
     if(/^#[0-9A-F]{6}$/i.test(val)){
-        gradB.value = val;
+        gradA.value = val;
         applyGradient();
-gradAHex.value = gradA.value;
-gradBHex.value = gradB.value;
-
     }
 });
 
