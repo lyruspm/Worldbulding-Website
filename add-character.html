@@ -66,6 +66,8 @@ button{
 
 </form>
 
+/* JAVA SCRIPT */
+    
 <script>
 const form = document.getElementById("characterForm");
 
@@ -85,9 +87,13 @@ form.addEventListener("submit", function(e){
 
     localStorage.setItem("characters", JSON.stringify(characters));
 
-    window.location.href = "characters.html";
+    window.location.replace("characters.html");
+    
 });
+    
 </script>
 
+
+    
 </body>
 </html>
