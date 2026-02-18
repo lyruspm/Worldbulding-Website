@@ -272,17 +272,31 @@ header{
 <!-- JAVA SCRIPT -->
 
 <script>
+
+/* =========================
+   GLOBAL STATE
+========================= */
 const list = document.getElementById("characterList");
 const searchInput = document.getElementById("searchInput");
 const folderBar = document.getElementById("folderBar");
+const addFolderBtn = document.getElementById("addFolderBtn");
 
-let characters = JSON.parse(localStorage.getItem("characters")) || [];
+let characters = [];
 let savedFolders = JSON.parse(localStorage.getItem("folders")) || [];
-
 let activeFolder = "All";
 
 
-/* ===== CARD CREATOR ===== */
+/* =========================
+   LOAD CHARACTERS (SAFE)
+========================= */
+function loadCharacters(){
+    characters = JSON.parse(localStorage.getItem("characters")) || [];
+}
+
+
+/* =========================
+   CARD CREATOR
+========================= */
 function createCard(char, index){
 
     const card = document.createElement("div");
@@ -313,7 +327,10 @@ function createCard(char, index){
     return card;
 }
 
-/* ===== RENDER LIST ===== */
+
+/* =========================
+   RENDER LIST
+========================= */
 function renderList(array){
 
     list.innerHTML = "";
@@ -324,20 +341,29 @@ function renderList(array){
     }
 
     array.forEach(char => {
-        const originalIndex = characters.indexOf(char);
+
+        // safer index lookup
+        const originalIndex = characters.findIndex(c =>
+            c.name === char.name &&
+            c.desc === char.desc &&
+            c.tags === char.tags &&
+            c.image === char.image
+        );
+
         list.appendChild(createCard(char, originalIndex));
     });
 }
 
-/* ===== GET UNIQUE FOLDERS ===== */
+
+/* =========================
+   FOLDER SYSTEM
+========================= */
 function getFolders(){
 
     const folders = new Set(["All"]);
 
-    // manual folders
     savedFolders.forEach(f => folders.add(f));
 
-    // auto folders from characters
     characters.forEach(c=>{
         if(c.folder && c.folder.trim() !== ""){
             folders.add(c.folder);
@@ -347,12 +373,10 @@ function getFolders(){
     return [...folders];
 }
 
-/* ===== BUILD FOLDER BAR ===== */
 function buildFolderBar(){
 
     folderBar.innerHTML = "";
-    
-       
+
     const folders = getFolders();
 
     folders.forEach(folderName => {
@@ -375,20 +399,24 @@ function buildFolderBar(){
     });
 }
 
-/* ===== FILTER PIPELINE ===== */
+
+/* =========================
+   FILTER PIPELINE
+========================= */
 function applyFilters(){
 
-    let filtered = [...characters];
-    
+    loadCharacters();
 
-    // Folder filter
+    let filtered = [...characters];
+
+    /* Folder filter */
     if(activeFolder !== "All"){
         filtered = filtered.filter(c =>
             (c.folder || "").toLowerCase() === activeFolder.toLowerCase()
         );
     }
 
-    // Search filter
+    /* Search filter */
     const query = searchInput.value.toLowerCase().trim();
 
     if(query){
@@ -408,13 +436,10 @@ function applyFilters(){
     renderList(filtered);
 }
 
-/* ===== EVENTS ===== */
-searchInput.addEventListener("input", applyFilters);
 
-/* FOLDER */
-
-const addFolderBtn = document.getElementById("addFolderBtn");
-
+/* =========================
+   ADD FOLDER
+========================= */
 addFolderBtn.addEventListener("click", ()=>{
 
     const name = prompt("Folder name:");
@@ -437,9 +462,28 @@ addFolderBtn.addEventListener("click", ()=>{
 });
 
 
-/* ===== INIT ===== */
-buildFolderBar();
-applyFilters();
+/* =========================
+   EVENTS
+========================= */
+searchInput.addEventListener("input", applyFilters);
+
+
+/* Refresh if returning from manager page */
+window.addEventListener("focus", () => {
+    init();
+});
+
+
+/* =========================
+   INIT
+========================= */
+function init(){
+    loadCharacters();
+    buildFolderBar();
+    applyFilters();
+}
+
+init();
 
 </script>
 </body>
