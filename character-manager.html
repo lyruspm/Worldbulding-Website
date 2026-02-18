@@ -9,6 +9,7 @@
 :root{
     --bg-main:#0f1117;
     --bg-card:#1a1d26;
+    --bg-accent:#232734;
     --accent:#5aa2ff;
     --danger:#ff5a7a;
     --radius:14px;
@@ -21,22 +22,7 @@ body{
     padding:20px;
 }
 
-h1{
-    margin-bottom:20px;
-}
-
-/* AVATAR */
-.avatarPreview{
-    width:150px;
-    height:150px;
-    border-radius:50%;
-    background:var(--bg-card);
-    object-fit:cover;
-    display:block;
-    margin:0 auto 20px auto;
-}
-
-/* FORM */
+/* INPUTS */
 input, textarea{
     width:100%;
     padding:14px;
@@ -47,6 +33,7 @@ input, textarea{
     color:white;
 }
 
+/* BUTTONS */
 button{
     width:100%;
     padding:16px;
@@ -54,31 +41,40 @@ button{
     border-radius:var(--radius);
     margin-bottom:12px;
     font-size:16px;
-    cursor:pointer;
 }
 
 .saveBtn{ background:var(--accent); }
 .deleteBtn{ background:var(--danger); }
-.photoBtn{ background:#232734; }
 
-/* EDITOR */
+/* IMAGE */
+.avatarPreview{
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    object-fit:cover;
+    background:var(--bg-accent);
+    display:block;
+    margin:0 auto 16px auto;
+}
+
+/* CANVAS EDITOR */
 #editorContainer{
     display:none;
     margin-bottom:20px;
 }
 
 canvas{
-    width:250px;
-    height:250px;
+    width:260px;
+    height:260px;
     border-radius:50%;
-    background:#1a1d26;
     display:block;
-    margin:auto;
+    margin:0 auto 10px auto;
+    background:#000;
 }
 
 #zoomSlider{
     width:100%;
-    margin:10px 0;
+    margin-bottom:10px;
 }
 </style>
 </head>
@@ -94,7 +90,7 @@ canvas{
 <div id="editorContainer">
     <canvas id="imageCanvas" width="300" height="300"></canvas>
     <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1">
-    <button class="photoBtn" id="useImageBtn">Use This Image</button>
+    <button type="button" id="useImageBtn">Use Image</button>
 </div>
 
 <input id="charName" placeholder="Name">
@@ -109,34 +105,32 @@ canvas{
 /* ===== LOAD CHARACTER ===== */
 let characters = JSON.parse(localStorage.getItem("characters")) || [];
 let index = localStorage.getItem("editingCharacterIndex");
-
-if(index === null){
-    window.location.replace("characters.html");
-}
-
 let char = characters[index];
 
+let savedImageData = char?.image || null;
+
+/* ===== ELEMENTS ===== */
 const avatarPreview = document.getElementById("avatarPreview");
-
-if(char){
-    document.getElementById("charName").value = char.name || "";
-    document.getElementById("charDesc").value = char.desc || "";
-    document.getElementById("charTags").value = char.tags || "";
-    document.getElementById("charFolder").value = char.folder || "";
-
-    avatarPreview.src = char.image || "";
-}
-
-/* ===== IMAGE EDITOR ===== */
-let savedImageData = char.image || null;
-
 const fileInput = document.getElementById("charImage");
+const editor = document.getElementById("editorContainer");
 const canvas = document.getElementById("imageCanvas");
 const ctx = canvas.getContext("2d");
 const zoomSlider = document.getElementById("zoomSlider");
-const editor = document.getElementById("editorContainer");
 const useBtn = document.getElementById("useImageBtn");
 
+/* ===== LOAD DATA INTO FORM ===== */
+if(char){
+    charName.value = char.name || "";
+    charDesc.value = char.desc || "";
+    charTags.value = char.tags || "";
+    charFolder.value = char.folder || "";
+
+    if(char.image){
+        avatarPreview.src = char.image;
+    }
+}
+
+/* ===== IMAGE EDITOR ===== */
 let img = new Image();
 let scale = 1;
 let posX = 0;
@@ -167,78 +161,79 @@ fileInput.addEventListener("change", function(){
 
 function draw(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.save();
 
+    ctx.save();
     ctx.beginPath();
     ctx.arc(150,150,150,0,Math.PI*2);
     ctx.clip();
 
-    ctx.drawImage(
-        img,
-        posX,
-        posY,
-        img.width * scale,
-        img.height * scale
-    );
-
+    ctx.drawImage(img, posX, posY, img.width*scale, img.height*scale);
     ctx.restore();
 }
 
-/* DRAG */
-canvas.addEventListener("mousedown", e=>{
-    dragging=true;
-    startX=e.offsetX;
-    startY=e.offsetY;
-});
+canvas.addEventListener("mousedown", startDrag);
+canvas.addEventListener("touchstart", startDrag);
 
-canvas.addEventListener("mousemove", e=>{
+function startDrag(e){
+    dragging = true;
+    startX = e.offsetX || e.touches[0].clientX;
+    startY = e.offsetY || e.touches[0].clientY;
+}
+
+canvas.addEventListener("mousemove", dragMove);
+canvas.addEventListener("touchmove", dragMove);
+
+function dragMove(e){
     if(!dragging) return;
-    posX += e.offsetX - startX;
-    posY += e.offsetY - startY;
-    startX=e.offsetX;
-    startY=e.offsetY;
+
+    let x = e.offsetX || e.touches[0].clientX;
+    let y = e.offsetY || e.touches[0].clientY;
+
+    posX += x - startX;
+    posY += y - startY;
+
+    startX = x;
+    startY = y;
+
     draw();
-});
+}
 
 canvas.addEventListener("mouseup", ()=> dragging=false);
+canvas.addEventListener("touchend", ()=> dragging=false);
 
-/* ZOOM */
 zoomSlider.addEventListener("input", ()=>{
-    scale=parseFloat(zoomSlider.value);
+    scale = parseFloat(zoomSlider.value);
     draw();
 });
 
-/* CONFIRM IMAGE */
 useBtn.addEventListener("click", ()=>{
     savedImageData = canvas.toDataURL("image/png");
     avatarPreview.src = savedImageData;
     editor.style.display = "none";
 });
 
-/* ===== SAVE CHARACTER ===== */
-document.getElementById("saveBtn").onclick = () => {
+/* ===== SAVE ===== */
+saveBtn.onclick = () => {
 
     characters[index] = {
-        name: document.getElementById("charName").value,
-        desc: document.getElementById("charDesc").value,
-        tags: document.getElementById("charTags").value,
-        folder: document.getElementById("charFolder").value,
+        name: charName.value,
+        desc: charDesc.value,
+        tags: charTags.value,
+        folder: charFolder.value,
         image: savedImageData
     };
 
     localStorage.setItem("characters", JSON.stringify(characters));
-
-    window.location.replace("characters.html");
+    window.location.href = "character.html";
 };
 
 /* ===== DELETE ===== */
-document.getElementById("deleteBtn").onclick = () => {
+deleteBtn.onclick = () => {
 
-    if(confirm("Delete this character?")){
-        characters.splice(index,1);
-        localStorage.setItem("characters", JSON.stringify(characters));
-        window.location.replace("character.html");
-    }
+    characters.splice(index, 1);
+
+    localStorage.setItem("characters", JSON.stringify(characters));
+    window.location.href = "character.html";
 };
 </script>
 
