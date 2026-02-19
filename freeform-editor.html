@@ -84,7 +84,7 @@ label{
 .editor .highlight{
     position:absolute;
     inset:0;
-
+    
     padding:20px;
 
     font-family:Consolas, Monaco, monospace;
@@ -104,7 +104,7 @@ label{
 /* highlight layer */
 .editor .highlight{
     background:var(--bg-input);
-    color:var(--text-main);
+    color:#ffffff;
     pointer-events:none;
     z-index:1;
 
@@ -454,10 +454,9 @@ previewBtn.addEventListener("click", ()=>{
     iframe.style.height = "100%";
     iframe.style.border = "none";
 
-    // Keep scripts disabled
-    iframe.setAttribute("sandbox", "allow-same-origin");
+    // Scripts disabled
+    iframe.setAttribute("sandbox", "");
 
-    // Use srcdoc instead of doc.write
     iframe.srcdoc = `
         <!DOCTYPE html>
         <html>
@@ -467,7 +466,7 @@ previewBtn.addEventListener("click", ()=>{
             <style>
                 body {
                     background:#161a23;
-                    color:#e6e9ef;
+                    color:#ffffff;
                     font-family:Inter, system-ui, sans-serif;
                     padding:24px;
                 }
@@ -481,42 +480,9 @@ previewBtn.addEventListener("click", ()=>{
     `;
 
     previewRoot.appendChild(iframe);
-    iframe.onload = () => {
-    try {
-        const doc = iframe.contentDocument;
-        const body = doc.body;
 
-        // Wait a frame so styles fully apply
-        requestAnimationFrame(() => {
-
-            const computed = doc.defaultView.getComputedStyle(body);
-            let bg = computed.backgroundColor;
-
-            // If transparent, check html element
-            if (bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
-                bg = doc.defaultView.getComputedStyle(doc.documentElement).backgroundColor;
-            }
-
-            const luminance = getLuminance(bg);
-
-            // Only override if user didn't set color explicitly
-            const userColor = computed.color;
-
-            if (!userColor || userColor === "rgb(230, 233, 239)") {
-
-                if (luminance < 0.4) {
-                    body.style.color = "#f0f3f8";
-                } else {
-                    body.style.color = "#111418";
-                }
-            }
-
-        });
-
-    } catch (e) {
-        console.log("Luminance detection failed:", e);
-    }
-};
+    previewOverlay.style.display = "flex";
+});
 /* =========================
    ESCAPE
 ========================= */
@@ -675,26 +641,6 @@ cssInput.addEventListener("input", updateEditors);
 
 updateEditors();
 
-/*===============TEXT AUTO DETECT======================*/
-
-function getLuminance(rgbString) {
-    const rgb = rgbString.match(/\d+/g);
-    if (!rgb) return 0;
-
-    const r = parseInt(rgb[0]) / 255;
-    const g = parseInt(rgb[1]) / 255;
-    const b = parseInt(rgb[2]) / 255;
-
-    const a = [r, g, b].map(v =>
-        v <= 0.03928
-            ? v / 12.92
-            : Math.pow((v + 0.055) / 1.055, 2.4)
-    );
-
-    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
-}
 </script>
-
-
 </body>
 </html>
