@@ -261,6 +261,7 @@ button{
 .close-btn{
     position:absolute;
     top:18px;
+    alignment:center;
     right:18px;
     background:var(--danger);
     color:white;
@@ -271,6 +272,7 @@ button{
     font-weight:600;
     cursor:pointer;
     transition:all 0.2s ease;
+
 }
 
 .close-btn:hover{
@@ -684,22 +686,17 @@ function updateEditors(){
 ========================= */
 
 function autoResize(textarea, highlight){
+    const editor = textarea.parentElement;
+
     textarea.style.height = "auto";
     highlight.style.height = "auto";
+    editor.style.height = "auto";
 
     const newHeight = textarea.scrollHeight + "px";
 
     textarea.style.height = newHeight;
     highlight.style.height = newHeight;
-}
-
-function bindAutoResize(input, highlight){
-    input.addEventListener("input", ()=>{
-        autoResize(input, highlight);
-    });
-
-    // initial resize
-    autoResize(input, highlight);
+    editor.style.height = newHeight;
 }
 
 bindAutoResize(htmlInput, htmlHighlight);
