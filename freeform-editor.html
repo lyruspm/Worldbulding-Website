@@ -237,11 +237,22 @@ button{
     inset:0;
     background:rgba(5,8,14,0.85);
     backdrop-filter:blur(8px);
-    display:none;
+
+    display:flex;
     justify-content:center;
     align-items:center;
     padding:40px;
+
     z-index:999;
+
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.25s ease;
+}
+
+.preview-overlay.active{
+    opacity:1;
+    pointer-events:auto;
 }
 
 .preview-box{
@@ -571,7 +582,7 @@ previewBtn.addEventListener("click", ()=>{
 
     previewRoot.appendChild(iframe);
 
-    previewOverlay.style.display = "flex";
+    previewOverlay.classList.add("active");
 });
 /* =========================
    ESCAPE
@@ -755,19 +766,16 @@ previewOverlay.addEventListener("click", (e) => {
 
 // ESC key
 document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && previewOverlay.style.display === "flex") {
-        closeOverlay();
+ if (e.key === "Escape" && previewOverlay.classList.contains("active"))
     }
 });
 
 function closeOverlay() {
-    previewOverlay.style.display = "none";
+    previewOverlay.classList.remove("active");
     previewRoot.innerHTML = "";
 }
 
 
 </script>
-
-
 </body>
 </html>
