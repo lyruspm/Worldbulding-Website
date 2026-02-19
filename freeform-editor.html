@@ -3,347 +3,310 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Character Manager</title>
+<title>Freeform Profile Editor</title>
 
 <style>
-/* =========================
-   THEME TOKENS
-========================= */
 :root{
-    --bg-main:#0f1117;
-    --bg-card:#1a1d26;
-    --bg-accent:#232734;
-
+    --bg-main:#0d0f14;
+    --bg-panel:#161a23;
+    --bg-elev:#1c2130;
+    --bg-input:#11151d;
     --accent:#5aa2ff;
+    --accent-soft:rgba(90,162,255,0.15);
     --danger:#ff5a7a;
-
+    --text-main:#e6e9ef;
+    --text-dim:#9aa3b2;
+    --border:#252b3a;
     --radius:14px;
-
-    --space-xs:6px;
-    --space-sm:10px;
-    --space-md:16px;
-    --space-lg:24px;
-
-    --transition:0.18s ease;
+    --radius-sm:10px;
+    --shadow:0 10px 30px rgba(0,0,0,0.4);
 }
 
 /* =========================
    BASE
 ========================= */
-*{
-    box-sizing:border-box;
-}
 
 body{
-    background:var(--bg-main);
-    color:white;
-    font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-    padding:var(--space-lg);
-    line-height:1.4;
+    margin:0;
+    padding:32px;
+    background:linear-gradient(180deg,#0d0f14 0%, #0f1117 100%);
+    color:var(--text-main);
+    font-family:Inter, system-ui, -apple-system, sans-serif;
+    letter-spacing:0.2px;
+}
+
+h1{
+    margin:0 0 28px 0;
+    font-weight:700;
+    font-size:28px;
+    letter-spacing:0.5px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    letter-spacing:1px;
 }
 
 /* =========================
-   CARD LAYOUT (Optional)
+   TEXTAREAS
 ========================= */
-.card{
-    background:var(--bg-card);
-    border-radius:var(--radius);
-    padding:var(--space-lg);
-}
 
-/* =========================
-   INPUTS / TEXTAREAS / SELECT
-========================= */
-input,
-textarea,
-select{
-    width:100%;
-    padding:14px;
-    margin-bottom:var(--space-md);
-    border-radius:var(--radius);
-    border:none;
-    background:var(--bg-card);
-    color:white;
-    font-size:14px;
-
-    transition:var(--transition);
-    outline:none;
-}
-
-/* Focus glow */
-input:focus,
-textarea:focus,
-select:focus{
-    background:var(--bg-accent);
-    box-shadow:0 0 0 2px var(--accent);
-}
-
-/* Textarea usability */
 textarea{
+    width:100%;
+    min-height:220px;
+    background:var(--bg-input);
+    color:var(--text-main);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:24px;
     resize:vertical;
-    min-height:120px;
+    font-family:Consolas, Monaco, monospace;
+    font-size:13px;
+    line-height:1.5;
+    transition:all 0.2s ease;
+    box-shadow:inset 0 0 0 1px transparent;
 }
 
-/* Select reset */
-select{
-    appearance:none;
-    cursor:pointer;
+textarea:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-soft);
+}
+
+/* Scrollbar styling */
+textarea::-webkit-scrollbar{
+    width:8px;
+}
+textarea::-webkit-scrollbar-thumb{
+    background:#2a3142;
+    border-radius:8px;
 }
 
 /* =========================
-   BUTTON SYSTEM
+   BUTTONS
 ========================= */
+
 button{
     width:100%;
-    padding:16px;
+    padding:14px;
     border:none;
     border-radius:var(--radius);
-    margin-bottom:12px;
-    font-size:16px;
+    margin-bottom:14px;
     font-weight:600;
+    font-size:14px;
     cursor:pointer;
-
-    transition:var(--transition);
+    transition:all 0.2s ease;
+    box-shadow:var(--shadow);
 }
 
-/* Variants */
-.btn-primary{
-    background:var(--accent);
-}
-
-.btn-danger{
-    background:var(--danger);
-}
-
-/* Hover / Active */
 button:hover{
-    transform:translateY(-1px);
-    filter:brightness(1.05);
+    transform:translateY(-2px);
 }
 
 button:active{
     transform:translateY(0);
-    filter:brightness(.95);
 }
 
-/* =========================
-   AVATAR PREVIEW
-========================= */
-.avatarPreview{
-    width:140px;
-    height:140px;
-    border-radius:50%;
-    object-fit:cover;
-    background:var(--bg-accent);
-    display:block;
-    margin:0 auto var(--space-md) auto;
-}
-
-/* =========================
-   CANVAS EDITOR
-========================= */
-#editorContainer{
-    display:none;
-    margin-bottom:var(--space-lg);
-}
-
-canvas{
-    width:260px;
-    height:260px;
-    border-radius:50%;
-    display:block;
-    margin:0 auto var(--space-sm) auto;
-    background:#000;
-}
-
-#zoomSlider{
-    width:100%;
-    margin-bottom:var(--space-sm);
-}
-
-/* =========================
-   UTILITY HELPERS
-========================= */
-.center{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-}
-
-.stack > * + *{
-    margin-top:var(--space-md);
-}
-
-.hidden{
-    display:none !important;
-}
-
-/* =========================
-   MOBILE TWEAKS
-========================= */
-@media (max-width:480px){
-    body{
-        padding:var(--space-md);
-    }
-
-    canvas{
-        width:220px;
-        height:220px;
-    }
-
-    .avatarPreview{
-        width:120px;
-        height:120px;
-    }
-}
-
-/* Base button */
-.btn{
-    width:100%;
-    padding:16px;
-    border:none;
-    border-radius:var(--radius);
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.18s ease;
-}
-
-/* SAVE */
-.saveBtn{
+/* Primary */
+#saveBtn{
     background:var(--accent);
     color:white;
 }
 
-.saveBtn:hover{
-    filter:brightness(1.1);
+#saveBtn:hover{
+    box-shadow:0 0 18px var(--accent-soft);
 }
 
-.saveBtn:active{
-    filter:brightness(.9);
+/* Secondary */
+.secondary{
+    background:var(--bg-elev);
+    color:var(--text-main);
+    border:1px solid var(--border);
 }
 
+.secondary:hover{
+    background:#22283a;
+}
 
-/* DELETE */
-.deleteBtn{
+/* =========================
+   PREVIEW OVERLAY
+========================= */
+
+.preview-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.8);
+    backdrop-filter:blur(6px);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    padding:40px;
+    z-index:999;
+}
+
+.preview-box{
+    width:100%;
+    max-width:1000px;
+    height:90%;
+    background:var(--bg-panel);
+    border-radius:var(--radius);
+    overflow:auto;
+    position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    border:1px solid var(--border);
+    animation:fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn{
+    from{ opacity:0; transform:scale(0.98); }
+    to{ opacity:1; transform:scale(1); }
+}
+
+/* Close Button */
+.close-btn{
+    position:absolute;
+    top:16px;
+    right:16px;
     background:var(--danger);
+    border:none;
+    padding:6px 14px;
+    border-radius:var(--radius-sm);
     color:white;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+    transition:all 0.2s ease;
 }
 
-.deleteBtn:hover{
-    filter:brightness(1.1);
+.close-btn:hover{
+    box-shadow:0 0 14px rgba(255,90,122,0.4);
 }
 
-.deleteBtn:active{
-    filter:brightness(.9);
+#previewRoot{
+    padding:32px;
 }
 
+/* =========================
+   DEFAULT PROFILE STYLING
+========================= */
+
+.profile{
+    background:var(--bg-elev);
+    padding:28px;
+    border-radius:var(--radius);
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+}
+
+.profile img{
+    width:200px;
+    border-radius:50%;
+    display:block;
+    margin-bottom:16px;
+    border:4px solid var(--accent-soft);
+}
+
+/* =========================
+   CODE EDITOR
+========================= */
+
+.editor{
+    position:relative;
+    margin-bottom:24px;
+}
+
+.editor textarea,
+.editor .highlight{
+    font-family:Consolas, Monaco, monospace;
+    font-size:13px;
+    line-height:1.6;
+    padding:16px;
+    border-radius:14px;
+}
+
+.editor textarea{
+    position:relative;
+    inset:0;
+    width:100%;
+    height:100%;
+    resize:vertical;
+    background:transparent;
+    color:transparent;
+    caret-color:#5aa2ff;
+    border:1px solid #252b3a;
+    z-index:2;
+    margin-bottom:24px;
+    min-height:220px;
+}
+
+.editor .highlight{
+    background:#11151d;
+    border:1px solid #252b3a;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    color:#e6e9ef;
+    min-height:220px;
+}
+
+/* Syntax Colors */
+.token-tag{ color:#5aa2ff; }
+.token-bracket{ color:#ff7edb; }
+.token-attr{ color:#ffd166; }
+.token-string{ color:#7CFC9F; }
+.token-template{ color:#ff9f43; }
+.token-error{ background:rgba(255,90,122,0.2); color:#ff5a7a; }
+
+/* Error Panel */
+#errorPanel{
+    background:#1c2130;
+    border:1px solid #252b3a;
+    padding:12px;
+    border-radius:10px;
+    font-size:13px;
+    color:#ff5a7a;
+    margin-bottom:20px;
+}
+
+#errorPanel:empty{
+    display:none;
+}
 
 </style>
 </head>
 
 <body>
 
-<!-- HTML START -->
+<h1>Freeform Profile Editor</h1>
 
-<h1>Edit Character</h1>
+<label>HTML Layout</label>
 
-<img id="avatarPreview" class="avatarPreview">
-
-<input type="file" id="charImage" accept="image/*">
-
-<div id="editorContainer">
-    <canvas id="imageCanvas" width="300" height="300"></canvas>
-    <input type="range" id="zoomSlider" min="0.5" max="3" step="0.01" value="1">
-    <button type="button" id="useImageBtn">Use Image</button>
+<div class="editor">
+    <pre class="highlight" id="htmlHighlight"></pre>
+    <textarea id="htmlInput" spellcheck="false"></textarea>
 </div>
 
-<button type="button" id="freeformBtn" class="btn hidden">
-    Freeform Edit
-</button>
-
-<input id="charName" placeholder="Name">
-<textarea id="charDesc" placeholder="Description"></textarea>
-<input id="charTags" placeholder="Tags">
-<input id="charFolder" placeholder="Folder">
-
-<h2 style="margin-top:20px;">Life Timeline</h2>
-
-<input type="date" id="charBirthDate" placeholder="Birth Date">
-<input type="date" id="charDeathDate" placeholder="Death Date">
-
-
-<div id="autoStats" style="
-background:var(--bg-card);
-padding:14px;
-border-radius:var(--radius);
-margin-bottom:16px;
-font-size:14px;
-color:#9aa3b2;
-">
+<div class="editor">
+    <pre class="highlight" id="cssHighlight"></pre>
+    <textarea id="cssInput" spellcheck="false"></textarea>
 </div>
 
+<div id="errorPanel"></div>
 
-<h2 style="margin-top:20px;">Custom Fields</h2>
+<button id="saveBtn">Save Profile</button>
+<button class="secondary" id="previewBtn">Preview</button>
 
-<div id="customFieldsList"></div>
-
-<button type="button" id="addCustomFieldBtn">
-+ Add Custom Field
-</button>
-
-
-<h2 style="margin-top:20px;">Lore Metadata</h2>
-
-<input id="charSpecies" placeholder="Species">
-<input id="charFaction" placeholder="Faction">
-<input id="charOrigin" placeholder="Origin World / Location">
-
-<select id="charAlignment">
-    <option value="">Alignment</option>
-    <option>Hero</option>
-    <option>Neutral</option>
-    <option>Villain</option>
-    <option>Anti-Hero</option>
-    <option>Anti-Villain</option>
-</select>
-
-
-<div class="form-section">
-    <h3>Abilities</h3>
-
-    <div id="abilityList"></div>
-
-    <button type="button" id="addAbilityBtn">+ Add Ability</button>
+<div class="preview-overlay" id="previewOverlay">
+    <div class="preview-box">
+        <button class="close-btn" id="closePreview">Close</button>
+        <div id="previewRoot"></div>
+    </div>
 </div>
-
-
-
-<h2 style="margin-top:20px;">Relationships</h2>
-
-<div id="relationshipList"></div>
-
-<button type="button" id="addRelationshipBtn">
-+ Add Relationship
-</button>
-
-<button class="saveBtn" id="saveBtn">Save Changes</button>
-<button class="btn deleteBtn" id="deleteCharacterBtn">
-    Delete Character
-</button>
-
-
-
-
-
-
-
-<!-- HTML END -->
-
-
-
-
-<!-- JAVA SCRIPT -->
 
 <script>
 
@@ -363,25 +326,11 @@ if(!char.freeform){
     char.freeform = { html:"", css:"" };
 }
 
-/* =========================
-   ELEMENT REFERENCES
-========================= */
 const htmlInput = document.getElementById("htmlInput");
 const cssInput = document.getElementById("cssInput");
-const htmlHighlight = document.getElementById("htmlHighlight");
-const cssHighlight = document.getElementById("cssHighlight");
-const errorPanel = document.getElementById("errorPanel");
-
-const previewBtn = document.getElementById("previewBtn");
-const previewOverlay = document.getElementById("previewOverlay");
-const previewFrame = document.getElementById("previewFrame");
-const closePreview = document.getElementById("closePreview");
-
-/* =========================
-   INITIAL LOAD
-========================= */
 htmlInput.value = char.freeform.html || "";
 cssInput.value = char.freeform.css || "";
+
 
 /* =========================
    SAVE
@@ -394,29 +343,29 @@ document.getElementById("saveBtn").addEventListener("click", ()=>{
     alert("Freeform profile saved.");
 });
 
+
 /* =========================
-   SANITIZER (STRICT)
+   STRICT SANITIZER (JS FULLY DISABLED)
 ========================= */
-function sanitizeHTMLStrict(input){
+function sanitizeHTML(input){
 
-    if(!input) return "";
-
+    // Remove script tags completely
     input = input.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
-    input = input.replace(/\son\w+="[^"]*"/gi, "");
-    input = input.replace(/\son\w+='[^']*'/gi, "");
+
+    // Remove inline event handlers
+    input = input.replace(/\son\w+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "");
+
+    // Remove javascript: urls
     input = input.replace(/javascript:/gi, "");
-    input = input.replace(/<iframe[\s\S]*?>[\s\S]*?<\/iframe>/gi, "");
-    input = input.replace(/<object[\s\S]*?>[\s\S]*?<\/object>/gi, "");
-    input = input.replace(/<embed[\s\S]*?>/gi, "");
 
     return input;
 }
+
 
 /* =========================
    TEMPLATE VARIABLES
 ========================= */
 function applyTemplate(html){
-
     const replacements = {
         "{{name}}": char.name || "",
         "{{desc}}": char.desc || "",
@@ -432,37 +381,25 @@ function applyTemplate(html){
     return html;
 }
 
+
 /* =========================
-   SECURE PREVIEW (SANDBOXED)
+   PREVIEW
 ========================= */
+const previewBtn = document.getElementById("previewBtn");
+const previewOverlay = document.getElementById("previewOverlay");
+const previewRoot = document.getElementById("previewRoot");
+const closePreview = document.getElementById("closePreview");
+
 previewBtn.addEventListener("click", ()=>{
 
-    let safeHTML = sanitizeHTMLStrict(htmlInput.value);
+    let safeHTML = sanitizeHTML(htmlInput.value);
     safeHTML = applyTemplate(safeHTML);
+    const safeCSS = sanitizeHTML(cssInput.value);
 
-    let safeCSS = sanitizeHTMLStrict(cssInput.value);
-
-    const finalDoc = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                body{
-                    margin:0;
-                    padding:20px;
-                    font-family:sans-serif;
-                }
-                ${safeCSS}
-            </style>
-        </head>
-        <body>
-            ${safeHTML}
-        </body>
-        </html>
+    previewRoot.innerHTML = `
+        <style>${safeCSS}</style>
+        ${safeHTML}
     `;
-
-    previewFrame.setAttribute("sandbox", "");
-    previewFrame.srcdoc = finalDoc;
 
     previewOverlay.style.display = "flex";
 });
@@ -471,18 +408,22 @@ closePreview.addEventListener("click", ()=>{
     previewOverlay.style.display = "none";
 });
 
+
+/* =========================
+   ESCAPE
+========================= */
+function escapeHTML(str){
+    return str.replace(/&/g,"&amp;")
+              .replace(/</g,"&lt;")
+              .replace(/>/g,"&gt;");
+}
+
+
 /* =========================
    SYNTAX HIGHLIGHTING
 ========================= */
-function escapeHTML(str){
-    return str
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;");
-}
 
 function highlightHTML(code){
-
     code = escapeHTML(code);
 
     code = code.replace(/(\{\{.*?\}\})/g,
@@ -497,14 +438,13 @@ function highlightHTML(code){
     code = code.replace(/([a-zA-Z-:]+)=/g,
         '<span class="token-attr">$1</span>=');
 
-    code = code.replace(/(".*?"|'.*?')/g,
+    code = code.replace(/(".*?"|\'.*?\')/g,
         '<span class="token-string">$1</span>');
 
     return code;
 }
 
 function highlightCSS(code){
-
     code = escapeHTML(code);
 
     code = code.replace(/(^|\n)([^\{\}\n]+)(?=\s*\{)/g,
@@ -519,20 +459,22 @@ function highlightCSS(code){
     return code;
 }
 
+
 /* =========================
    ERROR DETECTION
 ========================= */
+
 function detectErrors(html, css){
 
     let errors = [];
-    const tagStack = [];
-    const voidTags = ["img","br","hr","input","meta","link"];
 
+    const voidTags = ["br","hr","img","input","meta","link","area","base","col","embed","param","source","track","wbr"];
+
+    const tagStack = [];
     const tagRegex = /<\/?([a-zA-Z0-9-]+)[^>]*>/g;
     let match;
 
     while((match = tagRegex.exec(html)) !== null){
-
         const fullTag = match[0];
         const tagName = match[1].toLowerCase();
 
@@ -564,12 +506,22 @@ function detectErrors(html, css){
         errors.push("Script tags are not allowed.");
     }
 
+    if(/javascript:/i.test(html)){
+        errors.push("javascript: URLs are not allowed.");
+    }
+
     return errors;
 }
+
 
 /* =========================
    LIVE UPDATE
 ========================= */
+
+const htmlHighlight = document.getElementById("htmlHighlight");
+const cssHighlight = document.getElementById("cssHighlight");
+const errorPanel = document.getElementById("errorPanel");
+
 function updateEditors(){
 
     const htmlCode = htmlInput.value;
@@ -592,24 +544,20 @@ function updateEditors(){
 htmlInput.addEventListener("input", updateEditors);
 cssInput.addEventListener("input", updateEditors);
 
-/* Scroll sync */
-function syncScroll(textarea, highlight){
-    highlight.scrollTop = textarea.scrollTop;
-    highlight.scrollLeft = textarea.scrollLeft;
-}
-
+/* Scroll sync (X + Y) */
 htmlInput.addEventListener("scroll", ()=>{
-    syncScroll(htmlInput, htmlHighlight);
+    htmlHighlight.scrollTop = htmlInput.scrollTop;
+    htmlHighlight.scrollLeft = htmlInput.scrollLeft;
 });
 
 cssInput.addEventListener("scroll", ()=>{
-    syncScroll(cssInput, cssHighlight);
+    cssHighlight.scrollTop = cssInput.scrollTop;
+    cssHighlight.scrollLeft = cssInput.scrollLeft;
 });
 
 updateEditors();
 
 </script>
-
 
 </body>
 </html>
