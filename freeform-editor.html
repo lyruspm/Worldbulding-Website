@@ -7,19 +7,20 @@
 
 <style>
 :root{
-    --bg-main:#0d0f14;
-    --bg-panel:#161a23;
-    --bg-elev:#1c2130;
-    --bg-input:#11151d;
-    --accent:#5aa2ff;
-    --accent-soft:rgba(90,162,255,0.15);
-    --danger:#ff5a7a;
-    --text-main:#e6e9ef;
-    --text-dim:#9aa3b2;
-    --border:#252b3a;
-    --radius:14px;
-    --radius-sm:10px;
-    --shadow:0 10px 30px rgba(0,0,0,0.4);
+    --bg-main:#0b0e14;
+    --bg-panel:#121722;
+    --bg-elev:#171d2b;
+    --bg-input:#0f141d;
+    --accent:#6ea8ff;
+    --accent-glow:rgba(110,168,255,0.25);
+    --danger:#ff647c;
+    --success:#7CFC9F;
+    --text-main:#e8ecf4;
+    --text-dim:#8f9bb3;
+    --border:#1f2635;
+    --radius:16px;
+    --radius-sm:12px;
+    --shadow:0 25px 60px rgba(0,0,0,0.55);
 }
 
 /* =========================
@@ -32,28 +33,114 @@
 
 body{
     margin:0;
-    padding:32px;
-    background:linear-gradient(180deg,#0d0f14 0%, #0f1117 100%);
+    padding:40px;
+    background:
+        radial-gradient(circle at 20% 0%, rgba(110,168,255,0.08), transparent 40%),
+        linear-gradient(180deg,#0b0e14 0%, #0e131c 100%);
     color:var(--text-main);
     font-family:Inter, system-ui, -apple-system, sans-serif;
-    letter-spacing:0.2px;
+    letter-spacing:0.3px;
 }
 
 h1{
-    margin:0 0 28px 0;
+    margin:0 0 32px 0;
+    font-size:30px;
     font-weight:700;
-    font-size:28px;
-    letter-spacing:0.5px;
+    background:linear-gradient(90deg,#ffffff,#9dbdff);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
 }
 
 label{
     display:block;
-    margin-bottom:8px;
-    font-size:13px;
+    margin-bottom:10px;
+    font-size:12px;
     font-weight:600;
     color:var(--text-dim);
     text-transform:uppercase;
-    letter-spacing:1px;
+    letter-spacing:1.5px;
+}
+
+/* =========================
+   LAYOUT WRAPPER
+========================= */
+
+.editor{
+    position:relative;
+    height:280px;
+    margin-bottom:28px;
+    border-radius:var(--radius);
+    background:var(--bg-panel);
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+}
+
+/* =========================
+   EDITOR LAYERS
+========================= */
+
+.editor textarea,
+.editor .highlight{
+    position:absolute;
+    inset:0;
+    padding:20px;
+
+    font-family:Consolas, Monaco, monospace;
+    font-size:13px;
+    line-height:20px;
+
+    white-space:pre;
+    overflow:auto;
+    border:none;
+}
+
+/* highlight layer */
+.editor .highlight{
+    background:var(--bg-input);
+    color:var(--text-main);
+    pointer-events:none;
+    z-index:1;
+}
+
+/* textarea typing layer */
+.editor textarea{
+    background:transparent;
+    color:transparent;
+    caret-color:var(--accent);
+    resize:none;
+    outline:none;
+    z-index:2;
+}
+
+/* focus glow */
+.editor:focus-within{
+    border-color:var(--accent);
+    box-shadow:
+        0 0 0 1px var(--accent),
+        0 0 30px var(--accent-glow),
+        var(--shadow);
+}
+
+/* =========================
+   SCROLLBARS
+========================= */
+
+.editor textarea::-webkit-scrollbar,
+.editor .highlight::-webkit-scrollbar{
+    width:10px;
+    height:10px;
+}
+
+.editor textarea::-webkit-scrollbar-thumb,
+.editor .highlight::-webkit-scrollbar-thumb{
+    background:#263047;
+    border-radius:10px;
+}
+
+.editor textarea::-webkit-scrollbar-thumb:hover,
+.editor .highlight::-webkit-scrollbar-thumb:hover{
+    background:#324060;
 }
 
 /* =========================
@@ -62,32 +149,25 @@ label{
 
 button{
     width:100%;
-    padding:14px;
-    border:none;
+    padding:15px;
     border-radius:var(--radius);
-    margin-bottom:14px;
     font-weight:600;
     font-size:14px;
     cursor:pointer;
-    transition:all 0.2s ease;
-    box-shadow:var(--shadow);
-}
-
-button:hover{
-    transform:translateY(-2px);
-}
-
-button:active{
-    transform:translateY(0);
+    border:none;
+    transition:all 0.25s ease;
+    margin-bottom:16px;
 }
 
 #saveBtn{
-    background:var(--accent);
+    background:linear-gradient(135deg,#5aa2ff,#7db5ff);
     color:white;
+    box-shadow:0 10px 30px rgba(90,162,255,0.35);
 }
 
 #saveBtn:hover{
-    box-shadow:0 0 18px var(--accent-soft);
+    transform:translateY(-3px);
+    box-shadow:0 15px 40px rgba(90,162,255,0.45);
 }
 
 .secondary{
@@ -97,8 +177,37 @@ button:active{
 }
 
 .secondary:hover{
-    background:#22283a;
+    background:#1e2638;
+    transform:translateY(-2px);
 }
+
+/* =========================
+   ERROR PANEL
+========================= */
+
+#errorPanel{
+    padding:14px 16px;
+    border-radius:var(--radius-sm);
+    font-size:13px;
+    margin-bottom:22px;
+    background:var(--bg-elev);
+    border:1px solid var(--border);
+    transition:all 0.2s ease;
+}
+
+#errorPanel:empty{
+    display:none;
+}
+
+/* =========================
+   SYNTAX COLORS
+========================= */
+
+.token-tag{ color:#6ea8ff; }
+.token-bracket{ color:#ff8bd6; }
+.token-attr{ color:#ffd166; }
+.token-string{ color:#7CFC9F; }
+.token-template{ color:#ffb86c; }
 
 /* =========================
    PREVIEW OVERLAY
@@ -107,8 +216,8 @@ button:active{
 .preview-overlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.8);
-    backdrop-filter:blur(6px);
+    background:rgba(5,8,14,0.85);
+    backdrop-filter:blur(8px);
     display:none;
     justify-content:center;
     align-items:center;
@@ -118,147 +227,61 @@ button:active{
 
 .preview-box{
     width:100%;
-    max-width:1000px;
+    max-width:1100px;
     height:90%;
     background:var(--bg-panel);
     border-radius:var(--radius);
-    overflow:auto;
-    position:relative;
-    box-shadow:0 20px 60px rgba(0,0,0,0.6);
     border:1px solid var(--border);
+    box-shadow:0 40px 80px rgba(0,0,0,0.7);
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
 }
 
 .close-btn{
     position:absolute;
-    top:16px;
-    right:16px;
+    top:18px;
+    right:18px;
     background:var(--danger);
-    border:none;
-    padding:6px 14px;
-    border-radius:var(--radius-sm);
     color:white;
+    border:none;
+    padding:8px 16px;
+    border-radius:var(--radius-sm);
     font-size:12px;
     font-weight:600;
     cursor:pointer;
+    transition:all 0.2s ease;
+}
+
+.close-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 8px 20px rgba(255,100,124,0.35);
 }
 
 #previewRoot{
+    flex:1;
+    overflow:auto;
     padding:32px;
 }
 
 /* =========================
-   DEFAULT PROFILE
+   RESPONSIVE
 ========================= */
 
-.profile{
-    background:var(--bg-elev);
-    padding:28px;
-    border-radius:var(--radius);
-    border:1px solid var(--border);
-    box-shadow:var(--shadow);
+@media (max-width:900px){
+    body{
+        padding:24px;
+    }
+
+    .editor{
+        height:240px;
+    }
+
+    .preview-box{
+        height:95%;
+    }
 }
-
-.profile img{
-    width:200px;
-    border-radius:50%;
-    display:block;
-    margin-bottom:16px;
-    border:4px solid var(--accent-soft);
-}
-
-/* =========================
-   CODE EDITOR (PERFECT SYNC)
-========================= */
-
-.editor{
-    position:relative;
-    height:260px;
-    margin-bottom:24px;
-    border-radius:var(--radius);
-}
-
-/* shared layer */
-.editor textarea,
-.editor .highlight{
-    position:absolute;
-    inset:0;
-    padding:16px;
-
-    font-family:Consolas, Monaco, monospace;
-    font-size:13px;
-    line-height:20px; /* fixed pixel height = no drift */
-
-    border-radius:var(--radius);
-    overflow:auto;
-    white-space:pre; /* no wrapping drift */
-}
-
-/* highlight layer */
-.editor .highlight{
-    background:var(--bg-input);
-    border:1px solid var(--border);
-    color:var(--text-main);
-    pointer-events:none;
-    z-index:1;
-}
-
-/* real typing layer */
-.editor textarea{
-    background:transparent;
-    color:transparent;
-    caret-color:var(--accent);
-    border:1px solid var(--border);
-    resize:none;
-    outline:none;
-    z-index:2;
-}
-
-.editor textarea:focus{
-    border-color:var(--accent);
-    box-shadow:0 0 0 3px var(--accent-soft);
-}
-
-/* Scrollbars */
-.editor textarea::-webkit-scrollbar,
-.editor .highlight::-webkit-scrollbar{
-    width:8px;
-    height:8px;
-}
-
-.editor textarea::-webkit-scrollbar-thumb,
-.editor .highlight::-webkit-scrollbar-thumb{
-    background:#2a3142;
-    border-radius:8px;
-}
-
-/* =========================
-   SYNTAX COLORS
-========================= */
-
-.token-tag{ color:#5aa2ff; }
-.token-bracket{ color:#ff7edb; }
-.token-attr{ color:#ffd166; }
-.token-string{ color:#7CFC9F; }
-.token-template{ color:#ff9f43; }
-.token-error{ background:rgba(255,90,122,0.2); color:#ff5a7a; }
-
-/* =========================
-   ERROR PANEL
-========================= */
-
-#errorPanel{
-    background:#1c2130;
-    border:1px solid #252b3a;
-    padding:12px;
-    border-radius:10px;
-    font-size:13px;
-    margin-bottom:20px;
-}
-
-#errorPanel:empty{
-    display:none;
-}
-
 </style>
 </head>
 
@@ -310,6 +333,10 @@ if(!char.freeform){
 
 const htmlInput = document.getElementById("htmlInput");
 const cssInput = document.getElementById("cssInput");
+const htmlHighlight = document.getElementById("htmlHighlight");
+const cssHighlight = document.getElementById("cssHighlight");
+const errorPanel = document.getElementById("errorPanel");
+
 htmlInput.value = char.freeform.html || "";
 cssInput.value = char.freeform.css || "";
 
@@ -327,18 +354,48 @@ document.getElementById("saveBtn").addEventListener("click", ()=>{
 
 
 /* =========================
-   STRICT SANITIZER (JS FULLY DISABLED)
+   HARD SANITIZER
 ========================= */
 function sanitizeHTML(input){
 
-    // Remove script tags completely
+    if(!input) return "";
+
+    // Remove script blocks
     input = input.replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "");
 
-    // Remove inline event handlers
+    // Remove dangerous container tags
+    input = input.replace(/<(iframe|object|embed|svg|math|link|meta|base|form|input|button|textarea)[\s\S]*?>[\s\S]*?<\/\1>/gi, "");
+    input = input.replace(/<(iframe|object|embed|svg|math|link|meta|base|form|input|button|textarea)[^>]*?>/gi, "");
+
+    // Remove inline event handlers (onload, onclick, etc)
     input = input.replace(/\son\w+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "");
 
-    // Remove javascript: urls
+    // Remove javascript: and data:
     input = input.replace(/javascript:/gi, "");
+    input = input.replace(/data:text\/html/gi, "");
+
+    return input;
+}
+
+
+/* =========================
+   CSS SANITIZER
+========================= */
+function sanitizeCSS(input){
+
+    if(!input) return "";
+
+    // Remove @import
+    input = input.replace(/@import[^;]+;/gi, "");
+
+    // Remove expression()
+    input = input.replace(/expression\s*\([^)]*\)/gi, "");
+
+    // Remove javascript URLs
+    input = input.replace(/url\(\s*javascript:[^)]+\)/gi, "");
+
+    // Remove behavior:
+    input = input.replace(/behavior\s*:/gi, "");
 
     return input;
 }
@@ -365,7 +422,7 @@ function applyTemplate(html){
 
 
 /* =========================
-   PREVIEW
+   SECURE PREVIEW (SANDBOXED IFRAME)
 ========================= */
 const previewBtn = document.getElementById("previewBtn");
 const previewOverlay = document.getElementById("previewOverlay");
@@ -376,12 +433,45 @@ previewBtn.addEventListener("click", ()=>{
 
     let safeHTML = sanitizeHTML(htmlInput.value);
     safeHTML = applyTemplate(safeHTML);
-    const safeCSS = sanitizeHTML(cssInput.value);
+    const safeCSS = sanitizeCSS(cssInput.value);
 
-    previewRoot.innerHTML = `
-        <style>${safeCSS}</style>
-        ${safeHTML}
-    `;
+    previewRoot.innerHTML = "";
+
+    const iframe = document.createElement("iframe");
+    iframe.style.width = "100%";
+    iframe.style.height = "100%";
+    iframe.style.border = "none";
+
+    // CRITICAL: no allow-scripts
+    iframe.setAttribute("sandbox", "");
+
+    previewRoot.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+
+    doc.open();
+    doc.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta http-equiv="Content-Security-Policy"
+                  content="default-src 'none'; style-src 'unsafe-inline'; img-src https: data:;">
+            <style>
+                body {
+                    background:#161a23;
+                    color:#e6e9ef;
+                    font-family:Inter, system-ui, sans-serif;
+                    padding:24px;
+                }
+                ${safeCSS}
+            </style>
+        </head>
+        <body>
+            ${safeHTML}
+        </body>
+        </html>
+    `);
+    doc.close();
 
     previewOverlay.style.display = "flex";
 });
@@ -500,10 +590,6 @@ function detectErrors(html, css){
    LIVE UPDATE
 ========================= */
 
-const htmlHighlight = document.getElementById("htmlHighlight");
-const cssHighlight = document.getElementById("cssHighlight");
-const errorPanel = document.getElementById("errorPanel");
-
 function updateEditors(){
 
     const htmlCode = htmlInput.value;
@@ -526,19 +612,6 @@ function updateEditors(){
 htmlInput.addEventListener("input", updateEditors);
 cssInput.addEventListener("input", updateEditors);
 
-/* Scroll sync (X + Y) */
-htmlInput.addEventListener("scroll", ()=>{
-    htmlHighlight.scrollTop = htmlInput.scrollTop;
-    htmlHighlight.scrollLeft = htmlInput.scrollLeft;
-});
-
-cssInput.addEventListener("scroll", ()=>{
-    cssHighlight.scrollTop = cssInput.scrollTop;
-    cssHighlight.scrollLeft = cssInput.scrollLeft;
-});
-
-updateEditors();
-
 function syncScroll(input, highlight){
     highlight.scrollTop = input.scrollTop;
     highlight.scrollLeft = input.scrollLeft;
@@ -552,7 +625,10 @@ cssInput.addEventListener("scroll", ()=>{
     syncScroll(cssInput, cssHighlight);
 });
 
+updateEditors();
+
 </script>
+
 
 </body>
 </html>
