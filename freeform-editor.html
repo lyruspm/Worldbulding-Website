@@ -73,7 +73,7 @@ label{
     background:var(--bg-panel);
     border:1px solid var(--border);
     box-shadow:var(--shadow);
-    overflow:hidden;
+    overflow:visible;
 }
 
 /* =========================
@@ -84,15 +84,21 @@ label{
 .editor .highlight{
     position:absolute;
     inset:0;
+
     padding:20px;
 
     font-family:Consolas, Monaco, monospace;
     font-size:13px;
     line-height:20px;
 
+    letter-spacing:0;
+    tab-size:4;
+
     white-space:pre;
+    word-wrap:normal;
     overflow:auto;
-    border:none;
+
+    box-sizing:border-box;
 }
 
 /* highlight layer */
@@ -101,6 +107,8 @@ label{
     color:var(--text-main);
     pointer-events:none;
     z-index:1;
+
+    overflow:hidden;
 }
 
 /* textarea typing layer */
@@ -111,6 +119,8 @@ label{
     resize:none;
     outline:none;
     z-index:2;
+
+    overflow:auto;
 }
 
 /* focus glow */
@@ -422,8 +432,9 @@ function applyTemplate(html){
 
 
 /* =========================
-   SECURE PREVIEW (SANDBOXED IFRAME)
+   SECURE PREVIEW (SANDBOXED IFRAME - FIX)
 ========================= */
+
 const previewBtn = document.getElementById("previewBtn");
 const previewOverlay = document.getElementById("previewOverlay");
 const previewRoot = document.getElementById("previewRoot");
@@ -438,19 +449,16 @@ previewBtn.addEventListener("click", ()=>{
     previewRoot.innerHTML = "";
 
     const iframe = document.createElement("iframe");
+
     iframe.style.width = "100%";
     iframe.style.height = "100%";
     iframe.style.border = "none";
 
-    // CRITICAL: no allow-scripts
+    // Keep scripts disabled
     iframe.setAttribute("sandbox", "");
 
-    previewRoot.appendChild(iframe);
-
-    const doc = iframe.contentDocument || iframe.contentWindow.document;
-
-    doc.open();
-    doc.write(`
+    // Use srcdoc instead of doc.write
+    iframe.srcdoc = `
         <!DOCTYPE html>
         <html>
         <head>
@@ -470,8 +478,9 @@ previewBtn.addEventListener("click", ()=>{
             ${safeHTML}
         </body>
         </html>
-    `);
-    doc.close();
+    `;
+
+    previewRoot.appendChild(iframe);
 
     previewOverlay.style.display = "flex";
 });
@@ -479,8 +488,6 @@ previewBtn.addEventListener("click", ()=>{
 closePreview.addEventListener("click", ()=>{
     previewOverlay.style.display = "none";
 });
-
-
 /* =========================
    ESCAPE
 ========================= */
@@ -589,14 +596,17 @@ function detectErrors(html, css){
 /* =========================
    LIVE UPDATE
 ========================= */
-
 function updateEditors(){
 
     const htmlCode = htmlInput.value;
     const cssCode = cssInput.value;
 
-    htmlHighlight.innerHTML = highlightHTML(htmlCode);
-    cssHighlight.innerHTML = highlightCSS(cssCode);
+    // Preserve final newline to prevent vertical drift
+    const htmlSafe = htmlCode.endsWith("\n") ? htmlCode + " " : htmlCode;
+    const cssSafe = cssCode.endsWith("\n") ? cssCode + " " : cssCode;
+
+    htmlHighlight.innerHTML = highlightHTML(htmlSafe);
+    cssHighlight.innerHTML = highlightCSS(cssSafe);
 
     const errors = detectErrors(htmlCode, cssCode);
 
@@ -609,21 +619,26 @@ function updateEditors(){
     }
 }
 
-htmlInput.addEventListener("input", updateEditors);
-cssInput.addEventListener("input", updateEditors);
+/* =========================
+   PERFECT SCROLL SYNC (FIXED)
+========================= */
 
-function syncScroll(input, highlight){
-    highlight.scrollTop = input.scrollTop;
-    highlight.scrollLeft = input.scrollLeft;
+function bindScrollSync(input, highlight){
+
+    input.addEventListener("scroll", ()=>{
+        highlight.scrollTop = input.scrollTop;
+        highlight.scrollLeft = input.scrollLeft;
+    });
+
+    // Force sync after input too
+    input.addEventListener("input", ()=>{
+        highlight.scrollTop = input.scrollTop;
+        highlight.scrollLeft = input.scrollLeft;
+    });
 }
 
-htmlInput.addEventListener("scroll", ()=>{
-    syncScroll(htmlInput, htmlHighlight);
-});
-
-cssInput.addEventListener("scroll", ()=>{
-    syncScroll(cssInput, cssHighlight);
-});
+bindScrollSync(htmlInput, htmlHighlight);
+bindScrollSync(cssInput, cssHighlight);
 
 updateEditors();
 
