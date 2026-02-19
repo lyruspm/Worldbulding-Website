@@ -710,22 +710,28 @@ bindAutoResize(cssInput, cssHighlight);
 /* =========================
    COLLAPSE SECTIONS
 ========================= */
-
 document.querySelectorAll(".section-header").forEach(header=>{
     header.addEventListener("click", ()=>{
         const section = header.parentElement;
         const toggle = header.querySelector(".toggle");
+        const editor = section.querySelector(".editor");
 
         section.classList.toggle("collapsed");
 
-        toggle.textContent =
-            section.classList.contains("collapsed") ? "+" : "−";
+        const isCollapsed = section.classList.contains("collapsed");
 
-        // FORCE RESET HEIGHT WHEN COLLAPSING
-        if(section.classList.contains("collapsed")){
-            const editor = section.querySelector(".editor");
-            if(editor){
+        toggle.textContent = isCollapsed ? "+" : "−";
+
+        if(editor){
+            if(isCollapsed){
                 editor.style.height = "0px";
+            } else {
+                editor.style.height = "auto";
+
+                // forcing recalculation so it resizes properly
+                const textarea = editor.querySelector("textarea");
+                const highlight = editor.querySelector(".highlight");
+                autoResize(textarea, highlight);
             }
         }
     });
