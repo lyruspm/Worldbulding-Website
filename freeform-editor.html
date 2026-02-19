@@ -486,26 +486,37 @@ previewBtn.addEventListener("click", ()=>{
         const doc = iframe.contentDocument;
         const body = doc.body;
 
-        const bg = getComputedStyle(body).backgroundColor;
-        const luminance = getLuminance(bg);
+        // Wait a frame so styles fully apply
+        requestAnimationFrame(() => {
 
-        // If background is dark
-        if (luminance < 0.4) {
-            body.style.color = "#f0f3f8";
-        } else {
-            body.style.color = "#111418";
-        }
+            const computed = doc.defaultView.getComputedStyle(body);
+            let bg = computed.backgroundColor;
+
+            // If transparent, check html element
+            if (bg === "rgba(0, 0, 0, 0)" || bg === "transparent") {
+                bg = doc.defaultView.getComputedStyle(doc.documentElement).backgroundColor;
+            }
+
+            const luminance = getLuminance(bg);
+
+            // Only override if user didn't set color explicitly
+            const userColor = computed.color;
+
+            if (!userColor || userColor === "rgb(230, 233, 239)") {
+
+                if (luminance < 0.4) {
+                    body.style.color = "#f0f3f8";
+                } else {
+                    body.style.color = "#111418";
+                }
+            }
+
+        });
+
     } catch (e) {
-        // Sandbox safe fallback
+        console.log("Luminance detection failed:", e);
     }
 };
-
-    previewOverlay.style.display = "flex";
-});
-
-closePreview.addEventListener("click", ()=>{
-    previewOverlay.style.display = "none";
-});
 /* =========================
    ESCAPE
 ========================= */
@@ -658,6 +669,10 @@ function bindScrollSync(input, highlight){
 bindScrollSync(htmlInput, htmlHighlight);
 bindScrollSync(cssInput, cssHighlight);
 
+htmlInput.addEventListener("input", updateEditors);
+cssInput.addEventListener("input", updateEditors);
+
+
 updateEditors();
 
 /*===============TEXT AUTO DETECT======================*/
@@ -678,9 +693,6 @@ function getLuminance(rgbString) {
 
     return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
 }
-
-
-
 </script>
 
 
