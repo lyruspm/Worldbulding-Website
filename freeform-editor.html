@@ -455,7 +455,7 @@ previewBtn.addEventListener("click", ()=>{
     iframe.style.border = "none";
 
     // Keep scripts disabled
-    iframe.setAttribute("sandbox", "");
+    iframe.setAttribute("sandbox", "allow-same-origin");
 
     // Use srcdoc instead of doc.write
     iframe.srcdoc = `
@@ -481,6 +481,24 @@ previewBtn.addEventListener("click", ()=>{
     `;
 
     previewRoot.appendChild(iframe);
+    iframe.onload = () => {
+    try {
+        const doc = iframe.contentDocument;
+        const body = doc.body;
+
+        const bg = getComputedStyle(body).backgroundColor;
+        const luminance = getLuminance(bg);
+
+        // If background is dark
+        if (luminance < 0.4) {
+            body.style.color = "#f0f3f8";
+        } else {
+            body.style.color = "#111418";
+        }
+    } catch (e) {
+        // Sandbox safe fallback
+    }
+};
 
     previewOverlay.style.display = "flex";
 });
@@ -641,6 +659,27 @@ bindScrollSync(htmlInput, htmlHighlight);
 bindScrollSync(cssInput, cssHighlight);
 
 updateEditors();
+
+/*===============TEXT AUTO DETECT======================*/
+
+function getLuminance(rgbString) {
+    const rgb = rgbString.match(/\d+/g);
+    if (!rgb) return 0;
+
+    const r = parseInt(rgb[0]) / 255;
+    const g = parseInt(rgb[1]) / 255;
+    const b = parseInt(rgb[2]) / 255;
+
+    const a = [r, g, b].map(v =>
+        v <= 0.03928
+            ? v / 12.92
+            : Math.pow((v + 0.055) / 1.055, 2.4)
+    );
+
+    return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+}
+
+
 
 </script>
 
