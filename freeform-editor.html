@@ -212,6 +212,52 @@ button:active{
     border:4px solid var(--accent-soft);
 }
 
+/* =========================
+   CODE EDITOR (FIXED)
+========================= */
+
+.editor{
+    position:relative;
+    margin-bottom:24px;
+    min-height:220px;
+}
+
+/* Shared sizing */
+.editor textarea,
+.editor .highlight{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    padding:16px;
+    font-family:Consolas, Monaco, monospace;
+    font-size:13px;
+    line-height:1.6;
+    border-radius:14px;
+    box-sizing:border-box;
+}
+
+/* Highlight layer (bottom) */
+.editor .highlight{
+    background:#11151d;
+    border:1px solid #252b3a;
+    white-space:pre-wrap;
+    word-wrap:break-word;
+    color:#e6e9ef;
+    z-index:1;
+    overflow:auto;
+}
+
+/* Textarea layer (top, invisible text) */
+.editor textarea{
+    background:transparent;
+    color:transparent;
+    caret-color:#5aa2ff;
+    border:1px solid #252b3a;
+    resize:none;
+    z-index:2;
+    overflow:auto;
+}
 
 
 </style>
@@ -222,10 +268,18 @@ button:active{
 <h1>Freeform Profile Editor</h1>
 
 <label>HTML Layout</label>
-<textarea id="htmlInput" placeholder="<div class='profile'>...</div>"></textarea>
 
-<label>CSS Styling</label>
-<textarea id="cssInput" placeholder=".profile { color:white; }"></textarea>
+<div class="editor">
+    <pre class="highlight" id="htmlHighlight"></pre>
+    <textarea id="htmlInput" spellcheck="false"></textarea>
+</div>
+
+<div class="editor">
+    <pre class="highlight" id="cssHighlight"></pre>
+    <textarea id="cssInput" spellcheck="false"></textarea>
+</div>
+
+<div id="errorPanel"></div>
 
 <button id="saveBtn">Save Profile</button>
 <button class="secondary" id="previewBtn">Preview</button>
@@ -347,6 +401,155 @@ previewBtn.addEventListener("click", ()=>{
 closePreview.addEventListener("click", ()=>{
     previewOverlay.style.display = "none";
 });
+
+function escapeHTML(str){
+    return str.replace(/&/g,"&amp;")
+              .replace(/</g,"&lt;")
+              .replace(/>/g,"&gt;");
+}
+
+/* =========================
+   SYNTAX HIGHLIGHTING
+========================= */
+
+function highlightHTML(code){
+
+    code = escapeHTML(code);
+
+    // Highlight template variables {{ }}
+    code = code.replace(/(\{\{.*?\}\})/g,
+        '<span class="token-template">$1</span>');
+
+    // Highlight brackets
+    code = code.replace(/(&lt;|&gt;)/g,
+        '<span class="token-bracket">$1</span>');
+
+    // Highlight tags
+    code = code.replace(/(&lt;\/?[a-zA-Z0-9-]+)/g,
+        '<span class="token-tag">$1</span>');
+
+    // Highlight attributes
+    code = code.replace(/([a-zA-Z-:]+)=/g,
+        '<span class="token-attr">$1</span>=');
+
+    // Highlight strings
+    code = code.replace(/(".*?"|'.*?')/g,
+        '<span class="token-string">$1</span>');
+
+    return code;
+}
+
+function highlightCSS(code){
+
+    code = escapeHTML(code);
+
+    // Highlight selectors
+    code = code.replace(/(^|\n)([^\{\}\n]+)(?=\s*\{)/g,
+        '$1<span class="token-tag">$2</span>');
+
+    // Highlight properties
+    code = code.replace(/([a-zA-Z-]+)(?=\s*:)/g,
+        '<span class="token-attr">$1</span>');
+
+    // Highlight values
+    code = code.replace(/:\s*([^;]+)/g,
+        ': <span class="token-string">$1</span>');
+
+    return code;
+}
+
+/* =========================
+   ERROR DETECTION
+========================= */
+
+function detectErrors(html, css){
+
+    let errors = [];
+
+// Basic tag validation
+const tagStack = [];
+const tagRegex = /<\/?([a-zA-Z0-9-]+)[^>]*>/g;
+let match;
+
+while((match = tagRegex.exec(html)) !== null){
+    const fullTag = match[0];
+    const tagName = match[1];
+
+    if(fullTag.startsWith("</")){
+        if(tagStack[tagStack.length - 1] === tagName){
+            tagStack.pop();
+        } else {
+            errors.push(`Unexpected closing tag: </${tagName}>`);
+        }
+    } else if(!fullTag.endsWith("/>")){
+        tagStack.push(tagName);
+    }
+}
+
+if(tagStack.length > 0){
+    errors.push(`Unclosed tag: <${tagStack[tagStack.length - 1]}>`);
+}
+
+    // Unclosed curly braces in CSS
+    let openBraces = (css.match(/{/g) || []).length;
+    let closeBraces = (css.match(/}/g) || []).length;
+
+    if(openBraces !== closeBraces){
+        errors.push("Unmatched { } in CSS.");
+    }
+
+    // Script detection
+    if(/<script/i.test(html)){
+        errors.push("Script tags are not allowed.");
+    }
+
+    return errors;
+}
+
+/* =========================
+   LIVE UPDATE
+========================= */
+
+const htmlInputEl = document.getElementById("htmlInput");
+const cssInputEl = document.getElementById("cssInput");
+const htmlHighlight = document.getElementById("htmlHighlight");
+const cssHighlight = document.getElementById("cssHighlight");
+const errorPanel = document.getElementById("errorPanel");
+
+function updateEditors(){
+
+    const htmlCode = htmlInputEl.value;
+    const cssCode = cssInputEl.value;
+
+    htmlHighlight.innerHTML = highlightHTML(htmlCode);
+    cssHighlight.innerHTML = highlightCSS(cssCode);
+
+    const errors = detectErrors(htmlCode, cssCode);
+
+    if(errors.length > 0){
+    errorPanel.style.display = "block";
+    errorPanel.style.color = "#ff5a7a";
+    errorPanel.innerHTML = errors.join("<br>");
+}else{
+    errorPanel.style.display = "block";
+    errorPanel.style.color = "#7CFC9F";
+    errorPanel.innerHTML = "✓ No syntax errors detected.";
+}
+}
+
+htmlInputEl.addEventListener("input", updateEditors);
+cssInputEl.addEventListener("input", updateEditors);
+
+/* Sync scroll */
+htmlInputEl.addEventListener("scroll",()=>{
+    htmlHighlight.scrollTop = htmlInputEl.scrollTop;
+});
+cssInputEl.addEventListener("scroll",()=>{
+    cssHighlight.scrollTop = cssInputEl.scrollTop;
+});
+
+updateEditors();
+
 
 </script>
 
