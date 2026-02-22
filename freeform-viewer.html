@@ -351,34 +351,65 @@ ${safeHTML || '<p style="text-align:center; opacity:0.7; padding:60px 20px;">(No
 </html>`;
 
       viewerContainer.appendChild(iframe);
+      
+      // ── SAVE AS PNG (improved version) ──
+savePngBtn.onclick = async () => {
+  if (savePngBtn.disabled) return;
 
-      // ── SAVE AS PNG (still works because html2canvas captures the rendered result) ──
-      savePngBtn.onclick = async () => {
-        savePngBtn.textContent = "Capturing...";
-        savePngBtn.disabled = true;
+  savePngBtn.textContent = "Preparing...";
+  savePngBtn.disabled = true;
 
-        try {
-          const canvas = await html2canvas(iframe, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: null,
-            logging: false
-          });
+  try {
+    // Give the iframe a moment to fully render fonts/images (common fix)
+    await new Promise(resolve => setTimeout(resolve, 400));
 
-          const link = document.createElement("a");
-          link.download = `${char.name?.replace(/\W+/g,'-') || "character"}-freeform.png`;
-          link.href = canvas.toDataURL("image/png");
-          link.click();
-        } catch (err) {
-          console.error("Capture failed:", err);
-          alert("Could not capture image.\n\nCheck console (F12) for details.");
-        }
+    const canvas = await html2canvas(iframe, {
+      scale: window.devicePixelRatio > 1 ? 2 : 3,   // better quality on retina/high-dpi
+      useCORS: true,                                // attempt to load external images
+      allowTaint: true,                             // allow tainted canvas if needed
+      backgroundColor: null,                        // preserve transparency if any
+      logging: false,                               // reduce console noise
+      windowWidth: iframe.offsetWidth,              // match actual size
+      windowHeight: iframe.offsetHeight,
+      x: 0,
+      y: 0,
+      scrollX: 0,
+      scrollY: -iframe.contentWindow?.scrollY || 0  // try to capture scrolled content
+    });
 
-        savePngBtn.textContent = "⬇ Save as PNG";
-        savePngBtn.disabled = false;
-      };
-    }
+    // Optional: add timestamp to filename to avoid overwrites
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const safeName = (char.name || "character")
+      .replace(/[^a-z0-9]/gi, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || "unnamed";
+
+    const link = document.createElement("a");
+    link.download = `${safeName}-freeform-${timestamp}.png`;
+    link.href = canvas.toDataURL("image/png", 0.98);  // slight quality compression
+    link.click();
+
+    // Optional success feedback
+    savePngBtn.textContent = "Saved! ✓";
+    setTimeout(() => {
+      savePngBtn.textContent = "⬇ Save as PNG";
+    }, 2000);
+
+  } catch (err) {
+    console.error("html2canvas failed:", err);
+    alert(
+      "Capture failed.\n\n" +
+      "Common reasons:\n" +
+      "• External images/fonts not loading (try local/hosted ones)\n" +
+      "• Page too large/complex\n" +
+      "• Browser blocking (extensions/adblock)\n\n" +
+      "Check console (F12) for details."
+    );
+    savePngBtn.textContent = "Try Again";
+  }
+
+  savePngBtn.disabled = false;
+};};
   </script>
 </body>
 </html>
