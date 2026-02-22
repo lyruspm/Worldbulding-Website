@@ -80,6 +80,8 @@ header{
     margin-bottom:14px;
     border:1px solid #2a2f3d;
     transition:transform .15s ease, border-color .15s ease;
+    position:relative;
+    overflow:visible;
 }
 
 .card-title{
@@ -94,8 +96,8 @@ header{
 }
 
 .card:hover{
-    transform:translateY(-2px);
     border-color:var(--accent);
+    box-shadow:0 4px 20px rgba(0,0,0,0.35);
 }
 
 
@@ -172,6 +174,9 @@ header{
     display:flex;
     gap:16px;
     align-items:center;
+}
+.radial-container{
+    margin-left:auto;
 }
 
 .card-text{
@@ -328,21 +333,27 @@ header{
     pointer-events:auto;
 }
 
-/* Even spacing around center */
 .radial-container.active .edit{
-    transform:translate(-60px, 0);
-    opacity:1;
-}
-
-.radial-container.active .view{
-    transform:translate(0, -60px);
-    opacity:1;
+    transform: translate(-70px, 0);
+    opacity: 1;
 }
 
 .radial-container.active .freeform{
-    transform:translate(-45px, -45px);
-    opacity:1;
+    transform: translate(-40px, -61px);
+    opacity: 1;
 }
+
+.radial-container.active .view{
+    transform: translate(0, -70px);
+    opacity: 1;
+}
+
+.radial-container.active .freeform-edit{
+    transform: translate(-60px, -35px);
+    opacity: 1;
+}
+
+
 
 
 </style>
@@ -485,6 +496,7 @@ function createCard(char){
         <button class="radial-item edit" title="Edit">✒</button>
         <button class="radial-item view" title="View">✦</button>
         <button class="radial-item freeform" title="Freeform">▶</button>
+        <button class="radial-item freeform-edit" title="Freeform Edit">🛠</button>
     </div>
 </div>
 </div>
@@ -525,12 +537,14 @@ card.querySelector(".view").addEventListener("click", (e)=>{
     window.location.href = "character-viewer.html";
 });
 
-/* FREEFORM */
-card.querySelector(".freeform").addEventListener("click", (e)=>{
+/* FREEFORM EDITOR */
+card.querySelector(".freeform-edit").addEventListener("click", (e)=>{
     e.stopPropagation();
-    localStorage.setItem("freeformCharacterId", char.id);
+    localStorage.setItem("editingCharacterId", char.id);
     window.location.href = "freeform-editor.html";
 });
+
+
 
 
     return card;
@@ -690,6 +704,7 @@ document.addEventListener("click", ()=>{
     document.querySelectorAll(".radial-container.active")
         .forEach(el => el.classList.remove("active"));
 });
+
 
 
 </script>
